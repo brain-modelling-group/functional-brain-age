@@ -17,8 +17,7 @@ requirements = [
         'matplotlib',   # Plotting
         'numpy',        # Numerical functions
         'scipy',        # Scientific python and signal processing
-        'onnx',         # Performance-focused scoring engine for Open Neural Network Exchange (ONNX) models.
-        ]
+        'onnxruntime']  # Performance-focused scoring engine for Open Neural Network Exchange (ONNX) models.
 
 # Get version
 versionpath = os.path.join(cwd, 'version.py')
