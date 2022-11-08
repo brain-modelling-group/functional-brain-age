@@ -16,7 +16,7 @@ cwd = os.path.abspath(os.path.dirname(__file__))
 requirements = [
         'matplotlib',   # Plotting
         'numpy',        # Numerical functions
-        'scipy'         # Scientific python and signal processing
+        'scipy',        # Scientific python and signal processing
         'onnx',         # Performance-focused scoring engine for Open Neural Network Exchange (ONNX) models.
         ]
 
