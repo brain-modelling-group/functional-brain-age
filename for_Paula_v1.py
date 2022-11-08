@@ -20,7 +20,9 @@ import onnxruntime as rt # onnx runtime is the bit that deals with the ONNX netw
 #
 #
     
-fid = open("C:\\Users\\nstevenson\\Desktop\\Python\\FBA\\FLE14-609.edf", "rb")
+#fid = open("C:\\Users\\nstevenson\\Desktop\\Python\\FBA\\FLE14-609.edf", "rb")
+fid = open('demo-data/FLE14-609.edf', 'rb')
+
 # the age of this EEG is 0.4 years
 
 ver = fid.read(8)
@@ -135,7 +137,7 @@ data = signal.resample(data, 32*15*60, axis=0)  # so this is a 15 minute segment
 data.astype('float32')
 
 
-onnx_model_file = 'D1_NN_18ch_model.onnx'                   # ANET style network - seznet_v2.onnx is RESNET
+onnx_model_file = 'demo-onnx/D1_NN_18ch_model.onnx'                   # ANET style network - seznet_v2.onnx is RESNET
 session = rt.InferenceSession(onnx_model_file)       # load network
 input_name = session.get_inputs()[0].name            # find what input layer is called
 
