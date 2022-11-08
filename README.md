@@ -21,13 +21,13 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://www.publicdomainpictures.net/en/view-image.php?image=372932&picture=artificial-intelligence">
+  <!-- <a href="https://www.publicdomainpictures.net/en/view-image.php?image=372932&picture=artificial-intelligence">
     <img src="images/logo.png" alt="Logo" width="80" height="80">
-  </a>
+  </a> -->
 
-  <h3 align="center">Functional Brain Age</h3>
+  <h1 align="center">Functional Brain Age</h1> <!-- NOTE: probably replace by the title of the paper -->
 
-  <p align="center">
+  <!-- <p align="center">
     Functiona Brain Age
     <br />
     <a href="https://github.com/pausz/fab-example"><strong>Explore the docs »</strong></a>
@@ -36,7 +36,7 @@
     <a href="https://github.com/pausz/fab-example/issues">Report Bug</a>
     ·
     <a href="https://github.com/pausz/fab-example/issues">Request Feature</a>
-  </p>
+  </p> -->
 </div>
 
 
@@ -94,7 +94,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 <!-- GETTING STARTED -->
 ## Getting Started
 
-This script is an example of how you may use our trained network. To get a local copy up and running follow these simple example steps.
+This script is an example of how you may use our trained network. To get a local copy up and running follow the steps below.
 
 ### Prerequisites
 - We have tested this script on:
@@ -149,25 +149,6 @@ See the [open issues](https://github.com/pausz/fab-example/issues) for a full li
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
-
-<!-- CONTRIBUTING -->
-## Contributing
-
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
-Don't forget to give the project a star, or cite this work if you find it useful. Thanks!
-
-0. Fork the Project
-1. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-2. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-3. Push to the Branch (`git push origin feature/AmazingFeature`)
-4. Open a Pull Request
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
 <!-- LICENSE -->
 ## License
 
@@ -179,7 +160,7 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 <!-- CONTACT -->
 ## Contact
-- Nathan Stevenson - email dot _at_ example dot com
+- Nathan Stevenson - *nathan* dot *stevenson* _at_ *qimrberghofer* dot *edu* dot *au* 
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -195,8 +176,8 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
-* <something here>
-
+- [ ] Add something here if appropriate (ie, grant number, etc)
+  
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
@@ -204,7 +185,7 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 [contributors-shield]: https://img.shields.io/github/contributors/othneildrew/Best-README-Template.svg?style=for-the-badge
-[contributors-url]: https://github.com/othneildrew/Best-README-Template/graphs/contributors
+[contributors-url]: https://github.com/pausz/fba-example/graphs/contributors
 [license-shield]: https://img.shields.io/github/license/othneildrew/Best-README-Template.svg?style=for-the-badge
 [license-url]: https://github.com/othneildrew/Best-README-Template/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
