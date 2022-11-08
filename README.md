@@ -106,17 +106,19 @@ This script is an example of how you may use our trained network. To get a local
 
 _Below is an example of how you can instruct your audience on installing and setting up your app. This template doesn't rely on any external dependencies or services._
 
-0. Clone the repo
+0. Clone the repo and navigate to the folder
    ```sh
    git clone https://github.com/your_username_/Project-Name.git
+   cd fba-example/
    ```
-3. Create python environment from yml file
+3. Create python environment, and activate 
    ```sh
-   <insert command here>
+   conda create -n py39-fba python=3.9
+   conda activate py39-fba
    ```
-4. Run script
+4. Install required libraries to run the example
    ```sh
-   <insert command here>
+   pip install -e .
    ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
