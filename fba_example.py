@@ -118,8 +118,8 @@ def _read_edf_header(fid, decode_mode='utf-8'):
     phy_dim = [fid.read(8).strip().decode(decode_mode) for _ in channels]        # nchan x physical dimension (e.g. uV or degreeC)
     phy_min = [float(fid.read(8).decode(decode_mode)) for _ in channels]  # nchan x physical minimum (e.g. -500 or 34)
     phy_max = [float(fid.read(8).decode(decode_mode)) for _ in channels]  # nchan x physical maximum (e.g. 500 or 40)
-    dig_min =  [int(fid.read(8).decode(decode_mode)) for _ in channels]
-    dig_max =  [int(fid.read(8).decode(decode_mode)) for _ in channels]  # nchan * digital maximum (e.g. 2047)
+    dig_min = [int(fid.read(8).decode(decode_mode)) for _ in channels]
+    dig_max = [int(fid.read(8).decode(decode_mode)) for _ in channels]   # nchan * digital maximum (e.g. 2047)
     p_filt = fid.read(nchan * 80).decode(decode_mode)                    # nchan * prefiltering (e.g. HP:0.1Hz LP:75Hz)
     n_samp =  [int(fid.read(8).decode(decode_mode)) for _ in channels]   # nchan * number of samples
     rsrv2 = fid.read(nchan * 32)                                         # reserved
@@ -131,23 +131,21 @@ def _read_edf_header(fid, decode_mode='utf-8'):
                    (np.asarray(phy_max) - np.asarray(phy_min)) / (np.asarray(dig_max) - np.asarray(dig_min))
     )
 
-    data = {}
+    data = {
+        channel: [] for channel in chan_labels
+    }
     # setup up data dictionary
     INT16 = np.dtype('<i2')  # (2 Bytes) int 16-bit big endian
     # Read in data in int format
     for kk in range(n_rec):
         dum = np.fromfile(fid, count=sum(n_samp), dtype=INT16)
-        if kk == 0:
-            r1 = 0
-            for jj in range(nchan):
-                data[chan_labels[jj]] = dum[r1:r1 + n_samp[jj]]
-                # print(np.shape(dum[r1:r1+n_samp[jj]]), n_samp[jj])
-                r1 = r1 + n_samp[jj]
-        else:
-            r1 = 0
-            for jj in range(nchan):
-                data[chan_labels[jj]] = np.append(data[chan_labels[jj]], dum[r1:r1 + n_samp[jj]])
-                r1 = r1 + n_samp[jj]
+        r1 = 0
+        for jj, channel in enumerate(chan_labels):
+            if kk > 0:
+                data[channel] = np.append(data[channel], dum[r1:r1 + n_samp[jj]])
+            else:
+                data[channel] = dum[r1:r1 + n_samp[jj]]
+            r1 = r1 + n_samp[jj]
 
     edf_info = {'patient_id': pid, 'recording_id': rid, 'start_date': d_start, 'start_time': t_start,
                 'num_channels': nchan, 'channel_labels': chan_labels,
