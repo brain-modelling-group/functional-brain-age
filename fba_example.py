@@ -132,27 +132,26 @@ def _read_edf_header(fid, decode_mode='utf-8'):
     )
 
     data = {
-        channel: [] for channel in chan_labels
+        channel: np.empty((n_rec*n_samp[idx])) for idx, channel in enumerate(chan_labels)
     }
     # setup up data dictionary
     INT16 = np.dtype('<i2')  # (2 Bytes) int 16-bit big endian
     # Read in data in int format
     for kk in range(n_rec):
         dum = np.fromfile(fid, count=sum(n_samp), dtype=INT16)
-        r1 = 0
+        start_in = 0
         for jj, channel in enumerate(chan_labels):
-            if kk > 0:
-                data[channel] = np.append(data[channel], dum[r1:r1 + n_samp[jj]])
-            else:
-                data[channel] = dum[r1:r1 + n_samp[jj]]
-            r1 = r1 + n_samp[jj]
+            end_in = start_in + n_samp[jj]
+            start_out = n_samp[jj]*(kk)
+            end_out = n_samp[jj]*(kk+1)
+            data[channel][start_out:end_out] =  dum[start_in:end_in]
+            start_in = start_in + n_samp[jj]
 
     edf_info = {'patient_id': pid, 'recording_id': rid, 'start_date': d_start, 'start_time': t_start,
                 'num_channels': nchan, 'channel_labels': chan_labels,
                 'recording_duration': n_rec * rec_dur, 'transducer_type': trnsdcr,
                 'scale': scale, 'offset': offset, 'raw_data': data,
                 'channel_units': phy_dim}
-
 
     return edf_info
 
