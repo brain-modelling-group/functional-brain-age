@@ -75,7 +75,16 @@
 - [ ] Add a pic of the main result here
 - [ ] Add a paragraph with the description of what this thing is and what it does
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+The code in this repository estimates the 'age' of a segment of EEG recording from a paediatric population. This EEG based estimate of age is referred to as the function brain age (FBA). This code relates to the following publication with a Python and Matlab version available.
+
+Inputs: 1) EEG file in EDF format (a segment of N2 sleep)
+        2) The age of the subject of EEG recording (years)
+        3) The prediction algorithm used (training dataset: D1, D2 or D1&D2, channel number: 2 or 18, algorithm type: neural netowrks or Gaussian process regression [Matlab version only])
+
+Outputs: 1) Functional Brain Age (years)
+         2) Centile from Growth Chart based on our data
+         3) FBA corrected to align with growth chart
+         3) Predicted age difference (PAD)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
