@@ -17,8 +17,31 @@ import onnxruntime as rt  # onnx runtime is the bit that deals with the ONNX net
 
 
 
+parser = argparse.ArgumentParser()
+
+
+parser.add_argument('--edf_filename',
+                             default='demo-data/random-noise.edf',
+                             type=str,
+                             help=''' The name of the .edf file with EEG data''')
+
+parser.add_argument('--raw_fba',
+                            default=0.4,
+                            type=float,
+                            help=''' Raw Functional Brain Age, expressed in year.''')
+
+parser.add_argument('--onnx_filename',
+                             default='demo-onnx/D1_NN_18ch_model.onnx',
+                             type=str,
+                             help=''' The name of the .onnx file with the pretrained network.''')
+
+parser.add_argument('--montage_filename',
+                             default='demo-data/default_fba_montage.txt',
+                             type=str,
+                             help=''' The name of the .txt with the desired EEG montage''')
+
 # -- EEG related functions
-def read_edf(filename):
+def read_edf(filename, folder, verbose=True, **kwargs):
     '''
     Loads an EDF file. This is a very opinionated edf reader, that loads excatly the data the pretrained onnx model
     needs. Assumes the following properties about the EDF data:
@@ -29,9 +52,8 @@ def read_edf(filename):
     Args:
         filename  (str/Path): the filename (or full path) to load
         folder    (str/Path): the folder
-        montage   (dict):     the  labels of EEG channels
         verbose   (bool):     print details
-        kwargs    (dict):     passed to ``pickle.loads()``/``dill.loads()``
+        kwargs    (dict):     passed to
 
     Returns:
         eeg_dict  (dict): a dictionary with lots of information about the EDF we just read
@@ -208,6 +230,13 @@ def get_data_epoch():
     pass
 
 
+def centiles():
+    '''
+    Kartik's code
+
+    '''
+    pass
+
 # -- ONNX related functions
 def onnx_load_model(filename):
     ''' Loads an ONNX file that has been saved from matlab or other
@@ -218,7 +247,7 @@ def onnx_load_model(filename):
     # session = rt.InferenceSession(onnx_model_file)  # load network
     pass
 
-def onnx_estimate_fba():
+def onnx_estimate_age():
     # input_name = session.get_inputs()[0].name  # find what input layer is called
     #
     # # this is pulling the above data from a mat file into the correct format for ONNX/runtime
@@ -243,6 +272,6 @@ if __name__ == '__main__':
    # eed_data = make_montage(eeg_edf, filter=True, resample=True)
    # eeg_epoch = get_data_epoch(eeg_data)
    # onnx_model = onnx_load_model(onnx_model_filename)
-   # onnx_estimate_fba(onnx_model, eeg_epoch)
+   # onnx_estimate_age(onnx_model, eeg_epoch)
 
 
