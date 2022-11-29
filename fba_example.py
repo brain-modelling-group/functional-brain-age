@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
-
-Working example of Functional Brain Age prediction. By default runs with a demo edf and onnx file
+Working example of Functional Brain Age prediction.
+By default runs with a demo edf and onnx file
 
 @author: Nathan Stevenson, Kartik Iyer
 """
@@ -13,8 +13,10 @@ import argparse
 
 # Scientific Imports
 import numpy as np
+import scipy.io as io
 import scipy.signal as signal
 import onnxruntime as rt  # onnx runtime is the bit that deals with the ONNX network
+
 
 
 parser = argparse.ArgumentParser()
@@ -154,7 +156,8 @@ def _read_edf_header(fid, decode_mode='utf-8'):
                    (np.asarray(phy_max) - np.asarray(phy_min)) / (np.asarray(dig_max) - np.asarray(dig_min))
     )
 
-    data = _read_edf_data()
+    # Load the data
+    data = _read_edf_data(fid, n_rec, n_samp, chan_labels)
 
     # Dictionary with outputs
     edf_info = {'patient_id': pid,
@@ -233,10 +236,10 @@ def preprocess(eeg):
 
 
 def get_data_epoch():
-    # n = 29  # number of sample
-    # c = 1  # rgb colour depth
-    # h = 1920  # epoch length
-    # w = 18  # 18 channels
+    # n = 29     # number of sample
+    # c = 1      # rgb colour depth
+    # h = 1920   # epoch length
+    # w = 18     # 18 channels
     # aa = np.zeros((n, c, h, w)).astype('float32')
     #
     # for jj in range(0, n):
@@ -247,7 +250,43 @@ def get_data_epoch():
     pass
 
 
-def estimate_centile(age_var, fba_var, sub_id, offset_pars, to_plot=False):
+def _load_fitted_centiles(filename=None):
+    """
+    Load precomputed age and fba centiles, computed via GAMLSS in Rstudio
+
+    Parameters
+    ----------
+    filename : str | Path
+               the filename (or full path) to the file with the stored age and fba centiles
+               If filename=None (default) it loads the precomputed data.
+
+    Returns:
+    -------
+    age_centiles    : array
+                      an array of shape (n,), where n is the number of subjects in the combined FBA model
+                      In the default precomputed data n = 1810.
+    centile_centres : array
+                      an array of shape (m,), where m is the number of age bins tested.
+                      This array contains the bin centres, not the edges.
+                      In the default precomputed data n = 199.
+                      Bin centres are located at [0.5:0.5:99.5]
+    fba_centiles    : array
+                      an array of shape (m, n), where n is the number of subjects in the combined FBA model
+                                                      m is the number of centiles tested in the combined FBA model
+
+    """
+
+    if filename is not None:
+        # NOTE: placeholder in case we want to load something different
+        pass
+
+    precomp_centiles = io.loadmat('demo-data/centiles/fba_fitted_centiles_D1D2.mat')
+
+    return precomp_centiles['age_centiles'].flatten(), \
+           precomp_centiles['centiles_tested'].flatten(), \
+           precomp_centiles['fba_centiles']
+
+def estimate_centile(age_var, fba_var, sub_id, offset_pars, to_plot=False, **kwargs):
     """
      From original in matlab: fba_centile_estimate
      Computes the centile value based on actual empirical age (age_var)
@@ -270,15 +309,12 @@ def estimate_centile(age_var, fba_var, sub_id, offset_pars, to_plot=False):
 
                offset_pars['values']: float
                                       regression offset for the combined FBA model
+    kwargs   : dict, optional
+               keyword arguments passed to _load_fitted_centiles() in case you want
+               to load a new set of age and fba centiles
 
     to_plot  : bool
                whether to plot output or not, default=False
-
-    %age_centiles = age centiles; computed via GAMLSS in Rstudio
-    %fba_centiles = fba centiles; computed via GAMLSS in Rstudio.
-    %This is a m x n matrix where m is the number of centiles tested (see
-    %below) and n is the number of subjects in the combined FBA model
-    %centiles_tested = centile binning set to [0.5:0.5:99.5]
 
     Returns
     -------
@@ -341,8 +377,10 @@ def onnx_estimate_age():
 # Run as a script
 if __name__ == '__main__':
 
+    # This is the sequence of steps
     eeg_edf = load_edf("demo-data/FLE14-609.edf")
     # eed_data = make_montage(eeg_edf, filter=True, resample=True)
     # eeg_epoch = get_data_epoch(eeg_data)
+
     # onnx_model = onnx_load_model(onnx_model_filename)
     # onnx_estimate_age(onnx_model, eeg_epoch)
