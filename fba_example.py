@@ -82,6 +82,29 @@ def load_edf(filename, verbose=True, **kwargs):
     return  edf_info
 
 
+def _read_edf_data(fid, n_rec, n_samp, chan_labels):
+    """
+    Actually read the data in the EDF file
+    """
+    data = {
+        channel: np.empty((n_rec*n_samp[idx])) for idx, channel in enumerate(chan_labels)
+    }
+    # setup up data dictionary
+    INT16 = np.dtype('<i2')  # (2 Bytes) int 16-bit big endian
+    # Read in data in int format
+    for kk in range(n_rec):
+        dum = np.fromfile(fid, count=sum(n_samp), dtype=INT16)
+        start_in = 0
+        for jj, channel in enumerate(chan_labels):
+            end_in = start_in + n_samp[jj]
+            start_out = n_samp[jj]*(kk)
+            end_out = n_samp[jj]*(kk+1)
+            data[channel][start_out:end_out] =  dum[start_in:end_in]
+            start_in = start_in + n_samp[jj]
+
+    return  data
+
+
 def _read_edf_header(fid, decode_mode='utf-8'):
     """
     Read the correct bits out of the EDF file
@@ -131,28 +154,21 @@ def _read_edf_header(fid, decode_mode='utf-8'):
                    (np.asarray(phy_max) - np.asarray(phy_min)) / (np.asarray(dig_max) - np.asarray(dig_min))
     )
 
-    data = {
-        channel: np.empty((n_rec*n_samp[idx])) for idx, channel in enumerate(chan_labels)
-    }
-    # setup up data dictionary
-    INT16 = np.dtype('<i2')  # (2 Bytes) int 16-bit big endian
-    # Read in data in int format
-    for kk in range(n_rec):
-        dum = np.fromfile(fid, count=sum(n_samp), dtype=INT16)
-        start_in = 0
-        for jj, channel in enumerate(chan_labels):
-            end_in = start_in + n_samp[jj]
-            start_out = n_samp[jj]*(kk)
-            end_out = n_samp[jj]*(kk+1)
-            data[channel][start_out:end_out] =  dum[start_in:end_in]
-            start_in = start_in + n_samp[jj]
+    data = _read_edf_data()
 
-    edf_info = {'patient_id': pid, 'recording_id': rid, 'start_date': d_start, 'start_time': t_start,
-                'num_channels': nchan, 'channel_labels': chan_labels,
-                'recording_duration': n_rec * rec_dur, 'transducer_type': trnsdcr,
-                'scale': scale, 'offset': offset, 'raw_data': data,
+    # Dictionary with outputs
+    edf_info = {'patient_id': pid,
+                'recording_id': rid,
+                'start_date': d_start,
+                'start_time': t_start,
+                'num_channels': nchan,
+                'channel_labels': chan_labels,
+                'recording_duration': n_rec * rec_dur,
+                'transducer_type': trnsdcr,
+                'scale': scale,
+                'offset': offset,
+                'raw_data': data,
                 'channel_units': phy_dim}
-
     return edf_info
 
 
@@ -231,12 +247,67 @@ def get_data_epoch():
     pass
 
 
-def centiles():
+def estimate_centile(age_var, fba_var, sub_id, offset_pars, to_plot=False):
     """
-    Kartik's code
+     From original in matlab: fba_centile_estimate
+     Computes the centile value based on actual empirical age (age_var)
+     and functional brain age estimate (fba_var). It utilises
+     precomputed centiles spanning the data in the combined FBA
+     model (D1&D2)
+
+     Parameters
+     ----------
+     age_var : float
+               actual age of the subject / epoch of data
+     fba_var : float
+               functional brain age estimate obtained with the neural network model
+     subid   : int
+               subject id
+     offset_pars: dict
+               various parameters
+               offset_pars['offset'] : bool
+                                      whether fba_var is adjusted to the linear fit
+
+               offset_pars['values']: float
+                                      regression offset for the combined FBA model
+
+    to_plot  : bool
+               whether to plot output or not, default=False
+
+    %age_centiles = age centiles; computed via GAMLSS in Rstudio
+    %fba_centiles = fba centiles; computed via GAMLSS in Rstudio.
+    %This is a m x n matrix where m is the number of centiles tested (see
+    %below) and n is the number of subjects in the combined FBA model
+    %centiles_tested = centile binning set to [0.5:0.5:99.5]
+
+    Returns
+    -------
+    centile : float
+              a value between 0 and 100 (%) expressing the centile value
+              based on nearest FBA value in fba_centiles
+
+    fig_handle: figure object, optional if to_plot=True
 
     """
-    pass
+
+    if offset_pars['offset']:
+        # Apply offset
+        fba_var = fba_var + (age_var - ((offset_pars['value'] * age_var)))
+
+
+    # Do the stuff
+
+
+    if to_plot:
+        import matplotlib.pyplot as plt
+
+        # Do some plotting
+        plt.plot(age_var[sub_id], fba_var[sub_id])
+        plt.plot(age_centiles, fba_centiles[fba_nearest_idx,:])
+
+        return centile, fig_handle
+
+    return centile
 
 
 # -- ONNX related functions
