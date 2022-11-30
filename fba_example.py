@@ -169,10 +169,10 @@ def _read_edf_header(fid, decode_mode='utf-8'):
     return edf_info
 
 
-def to_df():
+def to_dataframe(filename=None, save=False):
     """
-    Save edf properties to a csv file from a pandas dataframe
-    should be a method if EDF were a class
+    Save edf properties to  a pandas dataframe, and optionally saves
+    it as a csv file. Should be a static method if EDF were a class
     Parameters
     ----------
 
