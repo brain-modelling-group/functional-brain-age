@@ -333,7 +333,7 @@ def _load_fitted_centiles(filename=None):
 
 def estimate_centile(age_var, fba_var, sub_id, offset_pars, to_plot=False, **kwargs):
     """
-     From original in matlab: fba_centile_estimate
+     From original in matlab: fba_centile_estimate.m
      Computes the centile value based on actual empirical age (age_var)
      and functional brain age estimate (fba_var). It utilises
      precomputed centiles spanning the data in the combined FBA
