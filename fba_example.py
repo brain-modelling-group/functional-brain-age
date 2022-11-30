@@ -235,19 +235,40 @@ def preprocess(eeg):
     pass
 
 
-def get_data_epoch():
-    # n = 29     # number of sample
-    # c = 1      # rgb colour depth
-    # h = 1920   # epoch length
-    # w = 18     # 18 channels
-    # aa = np.zeros((n, c, h, w)).astype('float32')
-    #
-    # for jj in range(0, n):
-    #     r1 = jj * 32 * 30
-    #     r2 = r1 + 32 * 60
-    #     aa[jj, 0, 0:, 0:] = data[r1:r2, :]
+def get_data_epoch(data, n_samples=29, c=1, epoch_length=1920, num_channels=18):
+    """
+     Extract n_samples data of length epoch_length
 
-    pass
+    Parameters:
+    -----------
+    data      : array
+                2D array with data to chunk into epochs
+    n_samples : int
+                number of samples to extract
+    c         : int
+                rgb colour depth
+    epoch length: int
+                length of each epock in number of samples
+    num_channels : int
+                number of channels in the data
+
+    :param decode_mode:
+
+    Returns:
+    -------
+    arr : array
+          4D array of shape (n_samples, c, epoch_length, num_channels)
+
+    """
+    # Allocate memory
+    arr = np.empty((n_samples, c, epoch_length, num_channels)).astype('float32')
+
+    for jj in range(n_samples):
+        r1 = jj * 32 * 30
+        r2 = r1 + 32 * 60
+        arr[jj, 0, ...] = data[r1:r2, ...]
+
+    return arr
 
 
 def _load_fitted_centiles(filename=None):
