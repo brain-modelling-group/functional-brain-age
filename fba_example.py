@@ -17,10 +17,7 @@ import scipy.io as io
 import scipy.signal as signal
 import onnxruntime as rt  # onnx runtime is the bit that deals with the ONNX network
 
-
-
 parser = argparse.ArgumentParser()
-
 
 parser.add_argument('--edf_filename',
                     default='demo-data/random-noise.edf',
@@ -43,8 +40,8 @@ parser.add_argument('--montage_filename',
                     help=''' The name of the .txt with the desired EEG montage''')
 
 
-# -- EEG related functions
-def load_edf(filename, verbose=True, **kwargs):
+# --------------------------------- EDF related functions -------------------------------------------------------------#
+def load_edf(filename, **kwargs):
     """
     Loads an EDF file. This is a very opinionated edf reader, that loads excatly the data the pretrained onnx model
     needs. Assumes the following properties about the EDF data:
@@ -72,7 +69,7 @@ def load_edf(filename, verbose=True, **kwargs):
         filename = str(filename)
 
     ext = os.path.splitext(filename)[1][1:].lower()
-    if ext in ('edf'):
+    if ext in 'edf':
         try:
             with open(filename, 'rb') as fid:
                 edf_info = _read_edf_header(fid)
@@ -81,7 +78,7 @@ def load_edf(filename, verbose=True, **kwargs):
     else:
         raise NotImplementedError(
                 f'Can only read EDF files, but got a {ext} file.')
-    return  edf_info
+    return edf_info
 
 
 def _read_edf_data(fid, n_rec, n_samp, chan_labels):
@@ -99,7 +96,7 @@ def _read_edf_data(fid, n_rec, n_samp, chan_labels):
         start_in = 0
         for jj, channel in enumerate(chan_labels):
             end_in = start_in + n_samp[jj]
-            start_out = n_samp[jj]*(kk)
+            start_out = n_samp[jj]*kk
             end_out = n_samp[jj]*(kk+1)
             data[channel][start_out:end_out] =  dum[start_in:end_in]
             start_in = start_in + n_samp[jj]
@@ -113,7 +110,7 @@ def _read_edf_header(fid, decode_mode='utf-8'):
 
     Parameters:
     -----------
-    :param fid:
+    :param fid: EDF file handle to read
     :param decode_mode:
 
     Returns:
@@ -127,9 +124,9 @@ def _read_edf_header(fid, decode_mode='utf-8'):
     d_start = fid.read(8).decode(decode_mode)  # startdate of recording (dd.mm.yy)
     t_start = fid.read(8).decode(decode_mode)  # starttime of recording (hh.mm.ss)
     # t_start = convert_time(d_start, t_start) convert to seconds from year 2000
-    h_len = int(fid.read(8).decode(decode_mode))      # number of bytes in header record
-    rsrv1 = fid.read(44)                              # reserved
-    n_rec = int(fid.read(8).decode(decode_mode))      # number of data records (-1 if unknown) duration of a data record, in seconds
+    h_len = int(fid.read(8).decode(decode_mode)) # number of bytes in header record
+    _ = fid.read(44)                         # rsrv1 reserved
+    n_rec = int(fid.read(8).decode(decode_mode)) # number of data records (-1 if unknown) duration of a data record, in seconds
     if n_rec == -1:
         raise ValueError(
             f'File does not contain eany data records'
@@ -145,13 +142,13 @@ def _read_edf_header(fid, decode_mode='utf-8'):
     phy_max = [float(fid.read(8).decode(decode_mode)) for _ in channels]  # nchan x physical maximum (e.g. 500 or 40)
     dig_min = [int(fid.read(8).decode(decode_mode)) for _ in channels]
     dig_max = [int(fid.read(8).decode(decode_mode)) for _ in channels]   # nchan * digital maximum (e.g. 2047)
-    p_filt = fid.read(nchan * 80).decode(decode_mode)                    # nchan * prefiltering (e.g. HP:0.1Hz LP:75Hz)
-    n_samp =  [int(fid.read(8).decode(decode_mode)) for _ in channels]   # nchan * number of samples
-    rsrv2 = fid.read(nchan * 32)                                         # reserved
+    _ = fid.read(nchan * 80).decode(decode_mode)                    # p_filt nchan * prefiltering (e.g. HP:0.1Hz LP:75Hz)
+    n_samp = [int(fid.read(8).decode(decode_mode)) for _ in channels]   # nchan * number of samples
+    _ = fid.read(nchan * 32)                                         # rsrv2 reserved
     # Check we haven't messed up in reading the header info
     assert fid.tell() == h_len
 
-    scale  = (np.asarray(phy_max) - np.asarray(phy_min)) / (np.asarray(dig_max) - np.asarray(dig_min))
+    scale = (np.asarray(phy_max) - np.asarray(phy_min)) / (np.asarray(dig_max) - np.asarray(dig_min))
     offset = (np.asarray(phy_min) + np.asarray(phy_max)) / 2 * (
                    (np.asarray(phy_max) - np.asarray(phy_min)) / (np.asarray(dig_max) - np.asarray(dig_min))
     )
@@ -183,6 +180,7 @@ def to_df():
     """
     pass
 
+# --------------------------------- eeg data  related functions --------------------------------------------------------#
 
 def make_montage(montage):
     """
@@ -220,19 +218,28 @@ def make_montage(montage):
     pass
 
 
-def preprocess(eeg):
+def preprocess(eeg_data):
     """
-    Filter and resample data
+    Filters and then resamples eeg data to 32 Hz, before being chunked and sent to the NN
+
+    Parameters:
+    -----------
+    eeg_data : array
+
+
+    Returns:
+    -------_
+    eeg_data : array
 
     """
 
-    # [b, a] = signal.butter(4, [0.5, 30], btype='bandpass', fs=250)
-    # data = signal.filtfilt(b, a, data, axis=0)
-    # data = signal.resample(data, 32 * 15 * 60, axis=0)  # so this is a 15 minute segment of EEG
-    # # that is filtered and resampled to 32 Hz, the next thing to do is split it up and send it to the NN
-    # data.astype('float32')
+    [b, a] = signal.butter(4, [0.5, 30], btype='bandpass', fs=250)
+    eeg_data = signal.filtfilt(b, a, eeg_data, axis=0)  # filter
+    eeg_data = signal.resample(eeg_data, 32 * 15 * 60, axis=0)  # resample to 32 Hz
+    # Change type
+    eeg_data.astype('float32')
 
-    pass
+    return eeg_data
 
 
 def get_data_epoch(data, n_samples=29, c=1, epoch_length=1920, num_channels=18):
@@ -252,8 +259,6 @@ def get_data_epoch(data, n_samples=29, c=1, epoch_length=1920, num_channels=18):
     num_channels : int
                 number of channels in the data
 
-    :param decode_mode:
-
     Returns:
     -------
     arr : array
@@ -270,6 +275,8 @@ def get_data_epoch(data, n_samples=29, c=1, epoch_length=1920, num_channels=18):
 
     return arr
 
+# --------------------------------- eeg data  related functions --------------------------------------------------------#
+
 
 def _load_fitted_centiles(filename=None):
     """
@@ -281,7 +288,7 @@ def _load_fitted_centiles(filename=None):
                the filename (or full path) to the file with the stored age and fba centiles
                If filename=None (default) it loads the precomputed data.
 
-    Returns:
+    Returns
     -------
     age_centiles    : array
                       an array of shape (n,), where n is the number of subjects in the combined FBA model
@@ -296,16 +303,13 @@ def _load_fitted_centiles(filename=None):
                                                       m is the number of centiles tested in the combined FBA model
 
     """
-
     if filename is not None:
         # NOTE: placeholder in case we want to load something different
         pass
 
     precomp_centiles = io.loadmat('demo-data/centiles/fba_fitted_centiles_D1D2.mat')
 
-    return precomp_centiles['age_centiles'].flatten(), \
-           precomp_centiles['centiles_tested'].flatten(), \
-           precomp_centiles['fba_centiles']
+    return precomp_centiles['age_centiles'].flatten(), precomp_centiles['centiles_tested'].flatten(), precomp_centiles['fba_centiles']
 
 
 def estimate_centile(age_var, fba_var, sub_id, offset_pars, to_plot=False, **kwargs):
@@ -318,13 +322,13 @@ def estimate_centile(age_var, fba_var, sub_id, offset_pars, to_plot=False, **kwa
 
      Parameters
      ----------
-     age_var : float | array
+     age_var : float or array
                actual age of the subject / epoch of data. If age_var is an array, then its
                shape is (n, ) where n is the number of subjects.
-     fba_var : float | array
+     fba_var : float or array
                functional brain age estimate obtained with the neural network model.
                If age_var is an array, then its shape is (n, ) where n is the number of subjects.
-     subid   : int
+     sub_id   : int
                subject id
      offset_pars: dict
                various parameters
@@ -333,13 +337,11 @@ def estimate_centile(age_var, fba_var, sub_id, offset_pars, to_plot=False, **kwa
 
                offset_pars['values']: float
                                       regression offset for the combined FBA model
+    to_plot  : bool
+               whether to plot output or not, default=False
     kwargs   : dict, optional
                keyword arguments passed to _load_fitted_centiles() in case you want
                to load a new set of age and fba centiles
-
-    to_plot  : bool
-               whether to plot output or not, default=False
-
     Returns
     -------
     centile : float
@@ -349,13 +351,12 @@ def estimate_centile(age_var, fba_var, sub_id, offset_pars, to_plot=False, **kwa
     fig_handle: figure object, optional if to_plot=True
 
     """
-
     if offset_pars['offset']:
         # Apply offset
-        fba_var = fba_var + (age_var - ((offset_pars['value'] * age_var)))
+        fba_var = fba_var + (age_var - (offset_pars['value'] * age_var))
 
     # Get precomputed data
-    age_centiles, centiles_tested, fba_centiles = _load_fitted_centiles()
+    age_centiles, centiles_tested, fba_centiles = _load_fitted_centiles(**kwargs)
 
     # NOTE: maybe add a consistency check for dimensions m and n
 
@@ -376,9 +377,11 @@ def estimate_centile(age_var, fba_var, sub_id, offset_pars, to_plot=False, **kwa
     if to_plot:
         import matplotlib.pyplot as plt
 
+        fig_handle, ax = plt.subplots()
+
         # Do some plotting
-        plt.plot(age_var[sub_id], fba_var[sub_id])
-        plt.plot(age_centiles, fba_centiles[fba_nearest_idx,:])
+        ax.plot(age_var[sub_id], fba_var[sub_id])
+        ax.plot(age_centiles, fba_centiles[fba_nearest_idx, :])
 
         return centile, fig_handle
 
@@ -386,14 +389,28 @@ def estimate_centile(age_var, fba_var, sub_id, offset_pars, to_plot=False, **kwa
 
 
 # -- ONNX related functions
-def onnx_load_model(filename):
-    """ Loads an ONNX file that has been saved from matlab or other
-
+def onnx_load_model(filename=None):
     """
+    Loads an ONNX file that has been saved from matlab or other
 
-    # onnx_model_file = 'demo-onnx/D1_NN_18ch_model.onnx'  # ANET style network - seznet_v2.onnx is RESNET
-    # session = rt.InferenceSession(onnx_model_file)  # load network
-    pass
+    Parameters
+    ----------
+    filename : str | Path
+               the filename (or full path) to the file with the stored age and fba centiles
+               If filename=None (default) it loads the pre-trained network D1_NN_18ch_model.onnx.
+
+    Returns
+    --------
+    session :  an ONNX InferenceSession object, the main class of ONNX Runtime. It is used to load and run an ONNX model,
+               as well as specify environment and application configuration options.
+    """
+    if filename is not None:
+        onnx_model_file = filename
+    else:
+        onnx_model_file = 'demo-onnx/D1_NN_18ch_model.onnx'  # ANET style network - seznet_v2.onnx is RESNET
+
+    session = rt.InferenceSession(onnx_model_file)           # load network
+    return session
 
 
 def onnx_estimate_age():
