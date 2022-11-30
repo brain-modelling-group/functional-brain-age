@@ -9,36 +9,12 @@ By default runs with a demo edf and onnx file
 # Base Imports
 import os
 from pathlib import Path
-import argparse
 
 # Scientific Imports
 import numpy as np
 import scipy.io as io
 import scipy.signal as signal
 import onnxruntime as rt  # onnx runtime is the bit that deals with the ONNX network
-
-parser = argparse.ArgumentParser()
-
-parser.add_argument('--edf_filename',
-                    default='demo-data/random-noise.edf',
-                    type=str,
-                    help=''' The name of the .edf file with EEG data''')
-
-parser.add_argument('--raw_fba',
-                    default=0.4,
-                    type=float,
-                    help=''' Raw Functional Brain Age, expressed in year.''')
-
-parser.add_argument('--onnx_filename',
-                    default='demo-onnx/D1_NN_18ch_model.onnx',
-                    type=str,
-                    help=''' The name of the .onnx file with the pretrained network.''')
-
-parser.add_argument('--montage_filename',
-                    default='demo-data/default_fba_montage.txt',
-                    type=str,
-                    help=''' The name of the .txt with the desired EEG montage''')
-
 
 # --------------------------------- EDF related functions -------------------------------------------------------------#
 def load_edf(filename, **kwargs):
@@ -432,6 +408,29 @@ def onnx_estimate_age():
 
 # Run as a script
 if __name__ == '__main__':
+    import argparse
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('--edf_filename',
+                        default='demo-data/random-noise.edf',
+                        type=str,
+                        help=''' The name of the .edf file with EEG data''')
+
+    parser.add_argument('--raw_fba',
+                        default=0.4,
+                        type=float,
+                        help=''' Raw Functional Brain Age, expressed in year.''')
+
+    parser.add_argument('--onnx_filename',
+                        default='demo-onnx/D1_NN_18ch_model.onnx',
+                        type=str,
+                        help=''' The name of the .onnx file with the pretrained network.''')
+
+    parser.add_argument('--montage_filename',
+                        default='demo-data/default_fba_montage.txt',
+                        type=str,
+                        help=''' The name of the .txt with the desired EEG montage''')
 
     # This is the sequence of steps
     eeg_edf = load_edf("demo-data/FLE14-609.edf")
