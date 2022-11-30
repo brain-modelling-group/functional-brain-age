@@ -286,6 +286,7 @@ def _load_fitted_centiles(filename=None):
            precomp_centiles['centiles_tested'].flatten(), \
            precomp_centiles['fba_centiles']
 
+
 def estimate_centile(age_var, fba_var, sub_id, offset_pars, to_plot=False, **kwargs):
     """
      From original in matlab: fba_centile_estimate
@@ -296,10 +297,12 @@ def estimate_centile(age_var, fba_var, sub_id, offset_pars, to_plot=False, **kwa
 
      Parameters
      ----------
-     age_var : float
-               actual age of the subject / epoch of data
-     fba_var : float
-               functional brain age estimate obtained with the neural network model
+     age_var : float | array
+               actual age of the subject / epoch of data. If age_var is an array, then its
+               shape is (n, ) where n is the number of subjects.
+     fba_var : float | array
+               functional brain age estimate obtained with the neural network model.
+               If age_var is an array, then its shape is (n, ) where n is the number of subjects.
      subid   : int
                subject id
      offset_pars: dict
@@ -330,9 +333,24 @@ def estimate_centile(age_var, fba_var, sub_id, offset_pars, to_plot=False, **kwa
         # Apply offset
         fba_var = fba_var + (age_var - ((offset_pars['value'] * age_var)))
 
+    # Get precomputed data
+    age_centiles, centiles_tested, fba_centiles = _load_fitted_centiles()
 
-    # Do the stuff
+    # NOTE: maybe add a consistency check for dimensions m and n
 
+    # Find the closest centile the actual (empirical) age belongs to
+    # [~,age_nearest_idx] = min(bsxfun(@(x,y)abs(x-y),age_var(subid),age_centiles'),[],2);
+    age_nearest_idx = np.argmin(np.abs(age_var-age_centiles))
+
+    # Extract the closest fba_centile based on the actual age
+    # fba_centiles is of shape (m, n), where m is the number of centiles, and n the number of subjects
+    test_fba_centile = fba_centiles[age_nearest_idx, :]
+
+    # [~, fba_nearest_idx] = min(bsxfun( @ (x, y) abs(x - y), fba_var(subid), testcen'),[],2);
+    fba_nearest_idx = np.argmin(np.abs(fba_var-test_fba_centile))
+
+    # Extract the closest tested centile based on predicted age (FBA)
+    centile = centiles_tested[fba_nearest_idx]
 
     if to_plot:
         import matplotlib.pyplot as plt
