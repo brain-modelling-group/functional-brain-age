@@ -40,6 +40,7 @@ def load_edf(filename, **kwargs):
     edf_info : dict
         a dictionary with lots of information about the EDF we just read
 
+    TODO: this function will be part of an EDF reader/loader class
     """
     if isinstance(filename, Path):
         filename = str(filename)
@@ -59,7 +60,20 @@ def load_edf(filename, **kwargs):
 
 def _read_edf_data(fid, n_rec, n_samp, chan_labels):
     """
-    Actually read the data in the EDF file
+    Actually reads the data in the EDF file
+
+    Parameters:
+    -----------
+    fid : obj
+        the object with the open file to read
+    n_rec  : float
+        number of data records (-1 if unknown) duration of a data record, in seconds
+    n_sample  : int
+        total number of samples to read = number of channels * number of samples per channel
+    chan_labels : list
+        list with channel human-readable labels for each channel (e.g. EEG: 'Fpz-Cz' or 'Body temp')
+
+    TODO: this function will be part of an EDF reader/loader class
     """
     data = {
         channel: np.empty((n_rec*n_samp[idx])) for idx, channel in enumerate(chan_labels)
@@ -86,11 +100,18 @@ def _read_edf_header(fid, decode_mode='utf-8'):
 
     Parameters:
     -----------
-    :param fid: EDF file handle to read
-    :param decode_mode:
+    fid  : obj
+           EDF file handle to read
+    decode_mode  : str
+           specifies the encoding of the EDF header info
 
     Returns:
     -------
+    edf_info  : dict
+           a dictionary with all the necessary info about this EDF file, including the data
+           in edf_ino['raw_data']
+
+    TODO: this function will be part of an EDF reader/loader class
 
     """
 
@@ -152,20 +173,37 @@ def to_df():
     """
     Save edf properties to a csv file from a pandas dataframe
     should be a method if EDF were a class
-    :return:
+    Parameters
+    ----------
+
+    Returns
+    -------
+    TODO: this function will be part of an EDF reader/loader class
     """
     pass
 
 # --------------------------------- eeg data  related functions --------------------------------------------------------#
 
-def make_montage(montage):
+def make_montage(eeg_edf, montage_specs, preprocess=True, **kwargs):
     """
     Either read a montage from a file, or a dictionary with the montage
-    Args:
-        montage     (str/Path/dict)
+    Parameters
+    ----------
+    eeg_data       : dict with edf info and data
+    montage_specs  : str or Path or dict
+    preprocess     : bool
+    kwargs         : dict, optiona
+                     passed to _preprocess()
 
-    Returns:
+    Returns
+    -------
+    eeg_data : array
     """
+
+    if isinstance(montage_specs, dict):
+        pass
+    elif isinstance(montage_specs, (str, Path)):
+        pass
 
     # # this is the montage so I will need to search through to fine the pairs in label, also seems to be in 'Raw Data'
     # # doing this the hard way - ideally you would search through the labels in eeg and assemble that way
@@ -191,22 +229,27 @@ def make_montage(montage):
     # data[:, 17] = eeg1['Cz             '] - eeg1['Pz             ']
     # data = data * eeg['Scale'][0]
     # data = data[0:15 * 250 * 60, 0:]
-    pass
+    if preprocess:
+        eeg_data = _preprocess(eeg_data, **kwargs)
+    return eeg_data
 
 
-def preprocess(eeg_data):
+def _preprocess(eeg_data):
     """
-    Filters and then resamples eeg data to 32 Hz, before being chunked and sent to the NN
+    Filters and then resamples eeg data to 32 Hz, before being chunked and sent to the
+    neural network.
 
     Parameters:
     -----------
     eeg_data : array
-
+        numpy array with eeg data
 
     Returns:
     -------_
     eeg_data : array
+        numpy array with the eeg data filtered and resampled (downsampled)
 
+    TODO: this function will be part of an EDF reader/loader class
     """
 
     [b, a] = signal.butter(4, [0.5, 30], btype='bandpass', fs=250)
@@ -389,21 +432,14 @@ def onnx_load_model(filename=None):
     return session
 
 
-def onnx_estimate_age():
-    # input_name = session.get_inputs()[0].name  # find what input layer is called
+def onnx_estimate_fab(onnx_session, eeg_epochs):
+    # this is pulling the above data from a mat file into the correct format for ONNX/runtime
+    input_name = onnx_session.get_inputs()[0].name  # find what input layer is called
     #
-    # # this is pulling the above data from a mat file into the correct format for ONNX/runtime
-    #
-    # #
-    # # TESTING
-    # #
-    #
-    # result = session.run(None, {
-    #     input_name: aa})  # run network - compare this to the outputs variable above to compare ONNX runtime to Matlab
-    # outputs1 = result[0]
-    # print(np.mean(outputs1))
-
-    pass
+    result = onnx_session.run(None, {input_name: eeg_epochs})  # run network - compare this to the outputs variable above to compare ONNX runtime to Matlab
+    outputs = result[0]
+    fab_estimate = np.mean(outputs)
+    return fab_estimate
 
 
 # Run as a script
@@ -438,4 +474,6 @@ if __name__ == '__main__':
     # eeg_epoch = get_data_epoch(eeg_data)
 
     # onnx_model = onnx_load_model(onnx_model_filename)
-    # onnx_estimate_age(onnx_model, eeg_epoch)
+    # onnx_estimate_fab(onnx_model, eeg_epoch)
+    # use this as centile information?
+
