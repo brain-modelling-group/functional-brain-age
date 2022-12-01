@@ -51,6 +51,7 @@ def load_edf(filename, **kwargs):
             with open(filename, 'rb') as fid:
                 edf_info = _read_edf_header(fid)
         except:  # something goes wrong and can't open the file
+            # TODO: actually handle the exception here, bare exceptions are bad
             pass
     else:
         raise NotImplementedError(
@@ -183,52 +184,75 @@ def to_dataframe(filename=None, save=False):
     pass
 
 # --------------------------------- eeg data  related functions --------------------------------------------------------#
+def _load_montage(filename=None):
+    """
 
-def make_montage(eeg_edf, montage_specs, preprocess=True, **kwargs):
+    Parameters
+    ----------
+    filename  : str or Path
+        name of file, or path to file with the desired montage, specified as:
+        Fp1-F7
+        F7-T3
+        T3-T5
+
+    Returns
+    -------
+        montage_specs  : dict
+            a dictionary with key value pairs, where key is a "channel a" and value is "channel b"
+            such that the resulting eeg data will be returned will be channel_a - channel_b
+
+    #TODO: generalise to accommodate unipolar montages
+    """
+
+    if filename is None:
+        filename = 'demo_montage.txt'
+
+    montage_specs = dict()
+    with open(filename, 'r+') as montage:
+        channels = montage.split("\n")
+        for channel in channels:
+            ch_a = channel.split('-')[0]
+            ch_b = channel.split('-')[1]
+            montage_specs[ch_a] = ch_b
+    return montage_specs
+
+
+def make_montage(edf_eeg, montage_specs=None, preprocess=True, **kwargs):
     """
     Either read a montage from a file, or a dictionary with the montage
     Parameters
     ----------
-    eeg_data       : dict with edf info and data
+    eeg_data : dict
+        dictionary with all the edf info and data
     montage_specs  : str or Path or dict
+
     preprocess     : bool
+         whether to apply preprocessing or not, if True (default) then the data is filtered and downsampled to 32Hz.
     kwargs         : dict, optiona
-                     passed to _preprocess()
+         options passed to _preprocess()
 
     Returns
     -------
     eeg_data : array
+        numpy array with the eeg_data to be passed to the make_data_epochs()
     """
+    # Check is montage is specified in a text file
 
-    if isinstance(montage_specs, dict):
-        pass
+    if montage_specs is None:
+       montage_specs = _load_montage()
     elif isinstance(montage_specs, (str, Path)):
-        pass
+        filename = montage_specs
+        montage_specs: dict = _load_montage(filename)
 
     # # this is the montage so I will need to search through to fine the pairs in label, also seems to be in 'Raw Data'
     # # doing this the hard way - ideally you would search through the labels in eeg and assemble that way
-    # eeg = edf_info['raw_data']
-    # data = np.zeros([225250, 18])
-    # data[:, 0] = eeg1['Fp2            '] - eeg1['F4             ']
-    # data[:, 1] = eeg1['F4             '] - eeg1['C4             ']
-    # data[:, 2] = eeg1['C4             '] - eeg1['P4             ']
-    # data[:, 3] = eeg1['P4             '] - eeg1['O2             ']
-    # data[:, 4] = eeg1['Fp1            '] - eeg1['F3             ']
-    # data[:, 5] = eeg1['F3             '] - eeg1['C3             ']
-    # data[:, 6] = eeg1['C3             '] - eeg1['P3             ']
-    # data[:, 7] = eeg1['P3             '] - eeg1['O1             ']
-    # data[:, 8] = eeg1['Fp2            '] - eeg1['F8             ']
-    # data[:, 9] = eeg1['F8             '] - eeg1['T4             ']
-    # data[:, 10] = eeg1['T4             '] - eeg1['T6             ']
-    # data[:, 11] = eeg1['T6             '] - eeg1['O2             ']
-    # data[:, 12] = eeg1['Fp1            '] - eeg1['F7             ']
-    # data[:, 13] = eeg1['F7             '] - eeg1['T3             ']
-    # data[:, 14] = eeg1['T3             '] - eeg1['T5             ']
-    # data[:, 15] = eeg1['T5             '] - eeg1['O1             ']
-    # data[:, 16] = eeg1['Fz             '] - eeg1['Cz             ']
-    # data[:, 17] = eeg1['Cz             '] - eeg1['Pz             ']
-    # data = data * eeg['Scale'][0]
-    # data = data[0:15 * 250 * 60, 0:]
+    eeg_data = np.zeros_like(edf_eeg['raw_data'])
+
+    for (ch_a, ch_b), idx in enumerate(zip(montage_specs.keys(), montage_specs.values())):
+        eeg_data[..., idx] = edf_eeg['raw_data'][ch_a] - edf_eeg['raw_data'][ch_b]
+    eeg_data = eeg_data * edf_eeg['scale'][0]
+    eeg_data = eeg_data[0:15 * 250 * 60, 0:]
+
     if preprocess:
         eeg_data = _preprocess(eeg_data, **kwargs)
     return eeg_data
@@ -261,9 +285,9 @@ def _preprocess(eeg_data):
     return eeg_data
 
 
-def get_data_epoch(data, n_samples=29, c=1, epoch_length=1920, num_channels=18):
+def make_data_epochs(data, n_samples=29, c=1, epoch_length=1920, num_channels=18):
     """
-     Extract n_samples data of length epoch_length
+    Extracts n_samples data of length epoch_length
 
     Parameters:
     -----------
@@ -329,6 +353,39 @@ def _load_fitted_centiles(filename=None):
     precomp_centiles = io.loadmat('demo-data/centiles/fba_fitted_centiles_D1D2.mat')
 
     return precomp_centiles['age_centiles'].flatten(), precomp_centiles['centiles_tested'].flatten(), precomp_centiles['fba_centiles']
+
+
+def _find_nearest_diff_index_simple(targets, sources):
+    """
+    Simple version: slow and memory heavy for large targets and sources
+
+    :param targets: 
+    :param sources: 
+    :return: 
+    """
+    differences = (sources.reshape(1,-1) - targets.reshape(-1,1))
+    indices = np.abs(differences).argmin(axis=0)
+    return indices
+
+
+def _find_nearest_diff_index_fast(targets, sources):
+    """
+    Optimised version: ~100x faster than (_find_nearest_diff_index_simple) for
+    large sources and targets, much less memory
+    """
+
+    # Make sure our target vector is sorted
+    is_sorted = lambda a: np.all(a[:-1] <= a[1:])
+    if not is_sorted(targets):
+        target_sort_indices = np.argsort(targets)
+        targets = targets[target_sort_indices]
+    else:
+        target_sort_indices = np.arange(0, np.size(targets))
+
+    # Convert to n-1 centres vector, as searchsorted() finds insertion points
+    target_middles = targets[1:] - (np.diff(targets.astype('f')) / 2)
+
+    return target_sort_indices[np.searchsorted(target_middles, sources)]
 
 
 def estimate_centile(age_var, fba_var, sub_id, offset_pars, to_plot=False, **kwargs):
