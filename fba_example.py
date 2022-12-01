@@ -33,7 +33,7 @@ def load_edf(filename, **kwargs):
     verbose  : bool
         whether to print details
     kwargs   : dict
-         passed to maybe some other function
+         passed to maybe some other function (not used at the moment)
 
     Returns:
     -------
@@ -432,16 +432,23 @@ def estimate_centile(age_var, fba_var, sub_id, offset_pars, centile_bin_centres=
 
     # NOTE: maybe add a consistency check for dimensions m and n
 
-    # Find the closest centile the actual (empirical) age belongs to
-    # [~,age_nearest_idx] = min(bsxfun(@(x,y)abs(x-y),age_var(subid),age_centiles'),[],2);
-    age_nearest_idx = np.argmin(np.abs(age_var-age_centiles))
+    if not isinstance(age_var, np.array): # Assume it's a scalar then
+        # Find the closest centile the actual (empirical) age belongs to
+        # [~,age_nearest_idx] = min(bsxfun(@(x,y)abs(x-y),age_var(subid),age_centiles'),[],2);
+        age_nearest_idx = np.argmin(np.abs(age_var - age_centiles))
+    else:
+        age_nearest_idx = _find_nearest_diff_index_fast(age_var, age_centiles)
+
 
     # Extract the closest fba_centile based on the actual age
     # fba_centiles is of shape (m, n), where m is the number of centiles, and n the number of subjects
     test_fba_centile = fba_centiles[age_nearest_idx, :]
 
-    # [~, fba_nearest_idx] = min(bsxfun( @ (x, y) abs(x - y), fba_var(subid), testcen'),[],2);
-    fba_nearest_idx = np.argmin(np.abs(fba_var-test_fba_centile))
+    if not isinstance(age_var, np.array):
+        # [~, fba_nearest_idx] = min(bsxfun( @ (x, y) abs(x - y), fba_var(subid), testcen'),[],2);
+        fba_nearest_idx = np.argmin(np.abs(fba_var - test_fba_centile))
+    else:
+        fba_nearest_idx = _find_nearest_diff_index_fast(fba_var, test_fba_centile)
 
     # Extract the closest tested centile based on predicted age (FBA)
     centile = centile_bin_centres[fba_nearest_idx]
