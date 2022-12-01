@@ -347,8 +347,11 @@ def _load_fitted_centiles(filename=None):
     if filename is None:
         filename = 'demo-data/centiles/fba_fitted_centiles_D1D2.mat'
     precomp_centiles = io.loadmat(filename)
+    offset_pars = dict()
+    offset_pars['offset'] = True
+    offset_pars['value'] = precomp_centiles['offset'][1] # Take second value of precomputed values
 
-    return precomp_centiles['age_centiles'].flatten(), precomp_centiles['fba_centiles']
+    return precomp_centiles['age_centiles'].flatten(), precomp_centiles['fba_centiles'], offset_pars
 
 
 def _find_nearest_diff_index_simple(targets, sources):
@@ -384,7 +387,7 @@ def _find_nearest_diff_index_fast(targets, sources):
     return target_sort_indices[np.searchsorted(target_middles, sources)]
 
 
-def estimate_centile(age_var, fba_var, sub_id, offset_pars, centile_bin_centres=np.r_[0.5:100:0.5], to_plot=False, **kwargs):
+def estimate_centile(age_var, fba_var, sub_id, centile_bin_centres=np.r_[0.5:100:0.5], offset_pars=None, to_plot=False, **kwargs):
     """
      From original in matlab: fba_centile_estimate.m
      Computes the centile value based on actual empirical age (age_var)
@@ -424,12 +427,16 @@ def estimate_centile(age_var, fba_var, sub_id, offset_pars, centile_bin_centres=
     fig_handle: figure object, optional if to_plot=True
 
     """
+    # Get precomputed data
+
+    if offset_pars is None:
+        age_centiles, fba_centiles, offset_pars = _load_fitted_centiles(**kwargs)
+    else:
+        age_centiles, fba_centiles, _ = _load_fitted_centiles(**kwargs)
+
     if offset_pars['offset']:
         # Apply offset
         fba_var = fba_var + (age_var - (offset_pars['value'] * age_var))
-
-    # Get precomputed data
-    age_centiles, fba_centiles = _load_fitted_centiles(**kwargs)
 
     # NOTE: maybe add a consistency check for dimensions m and n
     # Get indices of subjects
