@@ -16,6 +16,7 @@ import scipy.io as io
 import scipy.signal as signal
 import onnxruntime as rt  # onnx runtime is the bit that deals with the ONNX network
 
+
 # --------------------------------- EDF related functions -------------------------------------------------------------#
 def load_edf(filename, **kwargs):
     """
@@ -89,7 +90,7 @@ def _read_edf_data(fid, n_rec, n_samp, chan_labels):
             end_in = start_in + n_samp[jj]
             start_out = n_samp[jj]*kk
             end_out = n_samp[jj]*(kk+1)
-            data[channel][start_out:end_out] =  dum[start_in:end_in]
+            data[channel][start_out:end_out] = dum[start_in:end_in]
             start_in = start_in + n_samp[jj]
 
     return  data
@@ -183,7 +184,8 @@ def to_dataframe(filename=None, save=False):
     """
     pass
 
-# --------------------------------- eeg data  related functions --------------------------------------------------------#
+
+# --------------------------------- eeg data  related functions -------------------------------------------------------#
 def _load_montage(filename=None):
     """
 
@@ -209,7 +211,7 @@ def _load_montage(filename=None):
 
     montage_specs = dict()
     with open(filename, 'r+') as montage:
-        channels = montage.split("\n")
+        channels = montage.read().split('\n')
         for channel in channels:
             ch_a = channel.split('-')[0]
             ch_b = channel.split('-')[1]
@@ -222,7 +224,7 @@ def make_montage(edf_eeg, montage_specs=None, preprocess=True):
     Either read a montage from a file, or a dictionary with the montage
     Parameters
     ----------
-    eeg_data : dict
+    edf_eeg : dict
         dictionary with all the edf info and data
     montage_specs  : str or Path or dict
 
@@ -338,8 +340,8 @@ def _load_fitted_centiles(filename=None):
                       In the default precomputed data n = 199.
                       Bin centres are located at [0.5:0.5:99.5]
     fba_centiles    : array
-                      an array of shape (m, n), where n is the number of subjects in the combined FBA model
-                                                      m is the number of centiles tested in the combined FBA model
+                      an array of shape (n, m), n is the number of subjects in the combined FBA model
+                                                m is the number of centiles tested in the combined FBA model
 
     """
     if filename is None:
@@ -357,7 +359,7 @@ def _find_nearest_diff_index_simple(targets, sources):
     :param sources: 
     :return: 
     """
-    differences = (sources.reshape(1,-1) - targets.reshape(-1,1))
+    differences = (sources.reshape(1, -1) - targets.reshape(-1, 1))
     indices = np.abs(differences).argmin(axis=0)
     return indices
 
@@ -382,7 +384,7 @@ def _find_nearest_diff_index_fast(targets, sources):
     return target_sort_indices[np.searchsorted(target_middles, sources)]
 
 
-def estimate_centile(age_var, fba_var, sub_id, offset_pars, centile_bin_centres=np.r_[0.5:99.5:0.5], to_plot=False, **kwargs):
+def estimate_centile(age_var, fba_var, sub_id, offset_pars, centile_bin_centres=np.r_[0.5:100:0.5], to_plot=False, **kwargs):
     """
      From original in matlab: fba_centile_estimate.m
      Computes the centile value based on actual empirical age (age_var)
@@ -396,19 +398,18 @@ def estimate_centile(age_var, fba_var, sub_id, offset_pars, centile_bin_centres=
                actual age of the subject / epoch of data. If age_var is an array, then its
                shape is (n, ) where n is the number of subjects.
      fba_var : float or array
-               functional brain age estimate obtained with the neural network model.
-               If age_var is an array, then its shape is (n, ) where n is the number of subjects.
+               functional brain age prediction obtained with the neural network model.
+               If fba_var is an array, then its shape is (n, ) where n is the number of subjects.
      sub_id   : int
                subject id
      offset_pars: dict
-               various parameters
                offset_pars['offset'] : bool
-                                      whether fba_var is adjusted to the linear fit
-
+               whether fba_var is adjusted to the linear fit
                offset_pars['values']: float
-                                      regression offset for the combined FBA model
+               regression offset for the combined FBA model
     centile_bin_centres : array
                centres of centile bins that were tested in RStudio using the GAMLSS package
+               There are m
     to_plot  : bool
                whether to plot output or not, default=False
     kwargs   : dict, optional
@@ -416,7 +417,7 @@ def estimate_centile(age_var, fba_var, sub_id, offset_pars, centile_bin_centres=
                to load a new set of age and fba centiles
     Returns
     -------
-    centile : float
+    centile : float or array
               a value between 0 and 100 (%) expressing the centile value
               based on nearest FBA value in fba_centiles
 
@@ -431,24 +432,30 @@ def estimate_centile(age_var, fba_var, sub_id, offset_pars, centile_bin_centres=
     age_centiles, fba_centiles = _load_fitted_centiles(**kwargs)
 
     # NOTE: maybe add a consistency check for dimensions m and n
-
-    if not isinstance(age_var, np.array): # Assume it's a scalar then
+    # Get indices of subjects
+    if not isinstance(age_var, np.ndarray):  # Assume it's a scalar then
         # Find the closest centile the actual (empirical) age belongs to
         # [~,age_nearest_idx] = min(bsxfun(@(x,y)abs(x-y),age_var(subid),age_centiles'),[],2);
         age_nearest_idx = np.argmin(np.abs(age_var - age_centiles))
+        age = age_var
     else:
-        age_nearest_idx = _find_nearest_diff_index_fast(age_var, age_centiles)
-
+        age_var = age_var[:, np.newaxis]
+        age_nearest_idx = np.argmin(np.abs(np.tile(age_var, (1, age_centiles.shape[0])) - age_centiles), axis=1)
+        age = age_var[sub_id]
 
     # Extract the closest fba_centile based on the actual age
-    # fba_centiles is of shape (m, n), where m is the number of centiles, and n the number of subjects
-    test_fba_centile = fba_centiles[age_nearest_idx, :]
+    # fba_centiles is of shape (m, n), where n the number of subjects, where m is the number of centiles
+    # test_fba_centile is of shape (n, m), where n the number of subjects, where m is the number of centiles
+    test_fba_centile = fba_centiles[:, age_nearest_idx].T
 
-    if not isinstance(age_var, np.array):
+    if not isinstance(age_var, np.ndarray):
         # [~, fba_nearest_idx] = min(bsxfun( @ (x, y) abs(x - y), fba_var(subid), testcen'),[],2);
         fba_nearest_idx = np.argmin(np.abs(fba_var - test_fba_centile))
+        fba = fba_var
     else:
         fba_nearest_idx = _find_nearest_diff_index_fast(fba_var, test_fba_centile)
+        fba_nearest_idx = np.argmin(np.abs(np.tile(fba_var, (1, test_fba_centile.shape[0])) - test_fba_centile), axis=1)
+        fba = fba_var[sub_id]
 
     # Extract the closest tested centile based on predicted age (FBA)
     centile = centile_bin_centres[fba_nearest_idx]
@@ -459,8 +466,12 @@ def estimate_centile(age_var, fba_var, sub_id, offset_pars, centile_bin_centres=
         fig_handle, ax = plt.subplots()
 
         # Do some plotting
-        ax.plot(age_var[sub_id], fba_var[sub_id])
-        ax.plot(age_centiles, fba_centiles[fba_nearest_idx, :])
+        ax.plot(age_var, fba_var, color='black', marker='o', linestyle='none')
+        ax.plot(age, fba, color='black', marker='o', linestyle='none', markersize=12)
+        ax.plot(age_centiles, fba_centiles, color=[0, 0, 0, 0.4])
+        ax.plot(age_centiles, fba_centiles[fba_nearest_idx, :], color='blue', linewidth=2)
+        ax.xlabel('age [years]')
+        ax.ylabel('')
 
         return centile, fig_handle
 
@@ -480,7 +491,7 @@ def onnx_load_model(filename=None):
 
     Returns
     --------
-    session :  an ONNX InferenceSession object, the main class of ONNX Runtime. It is used to load and run an ONNX model,
+    session :  an ONNX InferenceSession object, main class of ONNX Runtime. It is used to load and run an ONNX model,
                as well as specify environment and application configuration options.
     """
     if filename is not None:
@@ -495,7 +506,8 @@ def onnx_load_model(filename=None):
 def onnx_estimate_fab(onnx_session, eeg_epochs):
     # this is pulling the above data from a mat file into the correct format for ONNX/runtime
     input_name = onnx_session.get_inputs()[0].name  # find what input layer is called
-    result = onnx_session.run(None, {input_name: eeg_epochs})  # run network - compare this to the outputs variable above to compare ONNX runtime to Matlab
+    result = onnx_session.run(None, {input_name: eeg_epochs})  # run network - compare this to the outputs variable
+                                                               # aboveto compare ONNX runtime to Matlab
     outputs = result[0]
     fab_estimate = np.mean(outputs)
     return fab_estimate
@@ -535,4 +547,3 @@ if __name__ == '__main__':
     # onnx_model = onnx_load_model(onnx_model_filename)
     # onnx_estimate_fab(onnx_model, eeg_epoch)
     # use this as centile information?
-
