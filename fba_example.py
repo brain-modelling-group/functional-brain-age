@@ -205,7 +205,7 @@ def _load_montage(filename=None):
     """
 
     if filename is None:
-        filename = 'demo_montage.txt'
+        filename = 'demo-data/montages/demo_montage.txt'
 
     montage_specs = dict()
     with open(filename, 'r+') as montage:
@@ -217,7 +217,7 @@ def _load_montage(filename=None):
     return montage_specs
 
 
-def make_montage(edf_eeg, montage_specs=None, preprocess=True, **kwargs):
+def make_montage(edf_eeg, montage_specs=None, preprocess=True):
     """
     Either read a montage from a file, or a dictionary with the montage
     Parameters
@@ -228,8 +228,6 @@ def make_montage(edf_eeg, montage_specs=None, preprocess=True, **kwargs):
 
     preprocess     : bool
          whether to apply preprocessing or not, if True (default) then the data is filtered and downsampled to 32Hz.
-    kwargs         : dict, optiona
-         options passed to _preprocess()
 
     Returns
     -------
@@ -244,8 +242,6 @@ def make_montage(edf_eeg, montage_specs=None, preprocess=True, **kwargs):
         filename = montage_specs
         montage_specs: dict = _load_montage(filename)
 
-    # # this is the montage so I will need to search through to fine the pairs in label, also seems to be in 'Raw Data'
-    # # doing this the hard way - ideally you would search through the labels in eeg and assemble that way
     eeg_data = np.zeros_like(edf_eeg['raw_data'])
 
     for (ch_a, ch_b), idx in enumerate(zip(montage_specs.keys(), montage_specs.values())):
@@ -254,7 +250,7 @@ def make_montage(edf_eeg, montage_specs=None, preprocess=True, **kwargs):
     eeg_data = eeg_data[0:15 * 250 * 60, 0:]
 
     if preprocess:
-        eeg_data = _preprocess(eeg_data, **kwargs)
+        eeg_data = _preprocess(eeg_data)
     return eeg_data
 
 
@@ -318,7 +314,7 @@ def make_data_epochs(data, n_samples=29, c=1, epoch_length=1920, num_channels=18
 
     return arr
 
-# --------------------------------- eeg data  related functions --------------------------------------------------------#
+# --------------------------------- eeg data  related functions -------------------------------------------------------#
 
 
 def _load_fitted_centiles(filename=None):
@@ -346,13 +342,11 @@ def _load_fitted_centiles(filename=None):
                                                       m is the number of centiles tested in the combined FBA model
 
     """
-    if filename is not None:
-        # NOTE: placeholder in case we want to load something different
-        pass
+    if filename is None:
+        filename = 'demo-data/centiles/fba_fitted_centiles_D1D2.mat'
+    precomp_centiles = io.loadmat(filename)
 
-    precomp_centiles = io.loadmat('demo-data/centiles/fba_fitted_centiles_D1D2.mat')
-
-    return precomp_centiles['age_centiles'].flatten(), precomp_centiles['centiles_tested'].flatten(), precomp_centiles['fba_centiles']
+    return precomp_centiles['age_centiles'].flatten(), precomp_centiles['fba_centiles']
 
 
 def _find_nearest_diff_index_simple(targets, sources):
@@ -388,7 +382,7 @@ def _find_nearest_diff_index_fast(targets, sources):
     return target_sort_indices[np.searchsorted(target_middles, sources)]
 
 
-def estimate_centile(age_var, fba_var, sub_id, offset_pars, to_plot=False, **kwargs):
+def estimate_centile(age_var, fba_var, sub_id, offset_pars, centile_bin_centres=np.r_[0.5:99.5:0.5], to_plot=False, **kwargs):
     """
      From original in matlab: fba_centile_estimate.m
      Computes the centile value based on actual empirical age (age_var)
@@ -413,6 +407,8 @@ def estimate_centile(age_var, fba_var, sub_id, offset_pars, to_plot=False, **kwa
 
                offset_pars['values']: float
                                       regression offset for the combined FBA model
+    centile_bin_centres : array
+               centres of centile bins that were tested in RStudio using the GAMLSS package
     to_plot  : bool
                whether to plot output or not, default=False
     kwargs   : dict, optional
@@ -432,7 +428,7 @@ def estimate_centile(age_var, fba_var, sub_id, offset_pars, to_plot=False, **kwa
         fba_var = fba_var + (age_var - (offset_pars['value'] * age_var))
 
     # Get precomputed data
-    age_centiles, centiles_tested, fba_centiles = _load_fitted_centiles(**kwargs)
+    age_centiles, fba_centiles = _load_fitted_centiles(**kwargs)
 
     # NOTE: maybe add a consistency check for dimensions m and n
 
@@ -448,7 +444,7 @@ def estimate_centile(age_var, fba_var, sub_id, offset_pars, to_plot=False, **kwa
     fba_nearest_idx = np.argmin(np.abs(fba_var-test_fba_centile))
 
     # Extract the closest tested centile based on predicted age (FBA)
-    centile = centiles_tested[fba_nearest_idx]
+    centile = centile_bin_centres[fba_nearest_idx]
 
     if to_plot:
         import matplotlib.pyplot as plt
@@ -492,7 +488,6 @@ def onnx_load_model(filename=None):
 def onnx_estimate_fab(onnx_session, eeg_epochs):
     # this is pulling the above data from a mat file into the correct format for ONNX/runtime
     input_name = onnx_session.get_inputs()[0].name  # find what input layer is called
-    #
     result = onnx_session.run(None, {input_name: eeg_epochs})  # run network - compare this to the outputs variable above to compare ONNX runtime to Matlab
     outputs = result[0]
     fab_estimate = np.mean(outputs)
