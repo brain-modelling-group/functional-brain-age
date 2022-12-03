@@ -9,7 +9,6 @@ import argparse
 
 import fba
 
-
 parser = argparse.ArgumentParser()
 
 parser.add_argument('--edf_filename',
@@ -32,11 +31,17 @@ parser.add_argument('--montage_filename',
                     type=str,
                     help=''' The name of the .txt with the desired EEG montage''')
 
-# This is the sequence of steps
+# Load, preprocess and chunk EEG data
 eeg_edf = fba.load_edf("demo-data/FLE14-609.edf")
 eeg_data = fba.make_montage(eeg_edf, preprocess=True)   # Uses default montage
 eeg_epoch = fba.make_data_epochs(eeg_data)
+
+# Load pretrained nn model
 onnx_model = fba.onnx_load_model()                      # Loads default model D1_NN_18ch_model.onnx
+
+# Estimate FBA
 fba_var = fba.onnx_estimate_fab(onnx_model, eeg_epoch)
+
+# Estimate centile
 sub_id = 0
 centile, _, _, _ = fba.estimate_centile(parser.raw_age, fba_var, sub_id, to_plot=True) # Uses default bins, lookup table and offset
