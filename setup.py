@@ -2,7 +2,7 @@
 
 '''
 Functional brain age (FBA) example, basic setup to pull necessary libraries
-with pip install
+with pip (pr preferrably pip3) install
 '''
 
 from setuptools import setup, find_packages
@@ -24,7 +24,7 @@ versionpath = os.path.join(cwd, 'version.py')
 version = runpy.run_path(versionpath)['__version__']
 
 setup(
-    name='fba-demo',
+    name='fab',
     version=version,
     author='Nathan Stevenson',
     author_email='pmsl.academic@gmail.com',         # TODO: for testing purposes, to change 
