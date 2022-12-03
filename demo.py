@@ -16,11 +16,6 @@ parser.add_argument('--edf_filename',
                     type=str,
                     help=''' The name of the .edf file with EEG data''')
 
-parser.add_argument('--raw_age',
-                    default=0.4,
-                    type=float,
-                    help='''Raw (Functional Brain Age) or just Age, expressed in years.''')
-
 parser.add_argument('--onnx_filename',
                     default='fba/data/onnx/D1_NN_18ch_model.onnx',
                     type=str,
@@ -30,6 +25,11 @@ parser.add_argument('--montage_filename',
                     default='fba/data/montages/default_fba_18ch_montage.txt',
                     type=str,
                     help=''' The name of the .txt with the desired EEG montage''')
+
+parser.add_argument('--raw_age',
+                    default=0.4,
+                    type=float,
+                    help='''Raw (Functional Brain Age) or just Age of the data in the EDF file, expressed in years.''')
 
 
 if __name__ == '__main__':
