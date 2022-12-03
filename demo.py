@@ -7,7 +7,7 @@ Example on how to use FBA functions
 
 import argparse
 
-import fba
+import fba as fba
 
 parser = argparse.ArgumentParser()
 
@@ -32,7 +32,7 @@ parser.add_argument('--montage_filename',
                     help=''' The name of the .txt with the desired EEG montage''')
 
 # Load, preprocess and chunk EEG data
-eeg_edf = fba.load_edf("demo-data/FLE14-609.edf")
+eeg_edf = fba.load_edf(filename="demo-data/FLE14-609.edf")
 eeg_data = fba.make_montage(eeg_edf, preprocess=True)   # Uses default montage
 eeg_epoch = fba.make_data_epochs(eeg_data)
 

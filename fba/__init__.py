@@ -5,10 +5,10 @@ This init is here so we can access the
 functions in fba.py without having to do
 
 either:
-import fba.fba
+import fba.core
 
 or:
-import fba.fba as fba
+import fba.core as fba
 
 We simply do:
 import fba as fba
@@ -17,4 +17,4 @@ or (less preferred):
 from fba import *
 """
 
-from .fba import *
+from .core import *

@@ -24,7 +24,7 @@ versionpath = os.path.join(cwd, 'version.py')
 version = runpy.run_path(versionpath)['__version__']
 
 setup(
-    name='fab',
+    name='fba',
     version=version,
     author='Nathan Stevenson',
     author_email='pmsl.academic@gmail.com',         # TODO: for testing purposes, to change 
