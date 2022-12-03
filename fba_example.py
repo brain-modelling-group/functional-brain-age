@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 """
-Working example of Functional Brain Age prediction.
-By default runs with a demo edf and onnx file
+Functions related to Functional Brain Age prediction.
 
-@author: Nathan Stevenson, Kartik Iyer
+@authors: Nathan Stevenson, Kartik Iyer
 """
 
 # Base Imports
@@ -366,10 +365,13 @@ def estimate_centile(age_var, fba_var, sub_id, centile_bin_centres=np.r_[0.5:100
      ----------
      age_var : float or array
                actual age of the subject / epoch of data. If age_var is an array, then its
-               shape is (n, ) where n is the number of subjects.
+               shape is (n, ) where n is the number of subjects. Must be a column vector.
+               If the array has more axes, or is a row vector, the code will not work, or provide
+               wrong results.
      fba_var : float or array
                functional brain age prediction obtained with the neural network model.
                If fba_var is an array, then its shape is (n, ) where n is the number of subjects.
+               Must be column vector.
      sub_id   : int
                subject id
      offset_pars: dict
@@ -401,6 +403,8 @@ def estimate_centile(age_var, fba_var, sub_id, centile_bin_centres=np.r_[0.5:100
     else:
         age_centiles, fba_centiles, _ = _load_fitted_centiles(**kwargs)
 
+    num_centiles = centile_bin_centres.shape[0]
+    num_subjects = age_var.shape[0]
     if offset_pars['offset']:
         # Apply offset
         fba_var = fba_var + (age_var - (offset_pars['value'] * age_var))
@@ -414,7 +418,7 @@ def estimate_centile(age_var, fba_var, sub_id, centile_bin_centres=np.r_[0.5:100
         age = age_var
     else:
         age_var = age_var[:, np.newaxis]
-        age_nearest_idx = np.argmin(np.abs(np.tile(age_var, (1, age_centiles.shape[0])) - age_centiles), axis=1)
+        age_nearest_idx = np.argmin(np.abs(np.tile(age_var, (1, num_subjects)) - age_centiles), axis=1)
         age = age_var[sub_id]
 
     # Extract the closest fba_centile based on the actual age
@@ -422,33 +426,44 @@ def estimate_centile(age_var, fba_var, sub_id, centile_bin_centres=np.r_[0.5:100
     # test_fba_centile is of shape (n, m), where n the number of subjects, where m is the number of centiles
     test_fba_centile = fba_centiles[:, age_nearest_idx].T
 
+    # Check dimensions are ok
+    assert test_fba_centile.shape == (num_subjects, num_centiles)
+
     if not isinstance(age_var, np.ndarray):
         # [~, fba_nearest_idx] = min(bsxfun( @ (x, y) abs(x - y), fba_var(subid), testcen'),[],2);
         fba_nearest_idx = np.argmin(np.abs(fba_var - test_fba_centile))
+        # Vars for plotting
         fba = fba_var
+        fba_idx = fba_nearest_idx
     else:
-        fba_nearest_idx = np.argmin(np.abs(np.tile(fba_var, (1, test_fba_centile.shape[0])) - test_fba_centile), axis=1)
+        fba_var = fba_var[:, np.newaxis]
+        fba_nearest_idx = np.argmin(np.abs(np.tile(fba_var, (1, num_centiles)) - test_fba_centile), axis=1)
+        # Vars for plotting
         fba = fba_var[sub_id]
+        fba_idx = fba_nearest_idx[sub_id]
 
     # Extract the closest tested centile based on predicted age (FBA)
     centile = centile_bin_centres[fba_nearest_idx]
 
     if to_plot:
         import matplotlib.pyplot as plt
-
         fig_handle, ax = plt.subplots()
 
         # Do some plotting
-        ax.plot(age_var, fba_var, color='black', marker='o', linestyle='none')
-        ax.plot(age, fba, color='black', marker='o', linestyle='none', markersize=12)
-        ax.plot(age_centiles, fba_centiles, color=[0, 0, 0, 0.4])
-        ax.plot(age_centiles, fba_centiles[fba_nearest_idx, :], color='blue', linewidth=2)
-        ax.xlabel('age [years]')
-        ax.ylabel('')
+        ax.plot(age_var, fba_var, color=[0.55, 0.55, 0.55], marker='o', linestyle='none', markersize=4)
+        # Plot single subject
+        ax.plot(age_centiles, fba_centiles.T, color=[0.0, 0.0, 0.0, 0.05])
+        ax.plot(age_centiles, fba_centiles[fba_idx, :].T, color='blue', linewidth=2)
+        ax.plot(age, fba, color='green', marker='o', linestyle='none', markersize=12)
+        ax.set_xlim([0, 18])
+        ax.set_ylim([0, 20])
+        ax.set_xlabel('age [years]')
+        ax.set_ylabel('FBA [years]')
+        plt.show()
 
-        return centile, fig_handle
+        return centile, age_nearest_idx, fba_nearest_idx, fig_handle
 
-    return centile
+    return centile, age_nearest_idx, fba_nearest_idx
 
 
 # -- ONNX related functions
@@ -485,38 +500,3 @@ def onnx_estimate_fab(onnx_session, eeg_epochs):
     fab_estimate = np.mean(outputs)
     return fab_estimate
 
-
-# Run as a script
-if __name__ == '__main__':
-    import argparse
-
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument('--edf_filename',
-                        default='demo-data/random-noise.edf',
-                        type=str,
-                        help=''' The name of the .edf file with EEG data''')
-
-    parser.add_argument('--raw_fba',
-                        default=0.4,
-                        type=float,
-                        help=''' Raw Functional Brain Age, expressed in year.''')
-
-    parser.add_argument('--onnx_filename',
-                        default='demo-onnx/D1_NN_18ch_model.onnx',
-                        type=str,
-                        help=''' The name of the .onnx file with the pretrained network.''')
-
-    parser.add_argument('--montage_filename',
-                        default='demo-data/default_fba_montage.txt',
-                        type=str,
-                        help=''' The name of the .txt with the desired EEG montage''')
-
-    # This is the sequence of steps
-    eeg_edf = load_edf("demo-data/FLE14-609.edf")
-    # eed_data = make_montage(eeg_edf, filter=True, resample=True)
-    # eeg_epoch = get_data_epoch(eeg_data)
-
-    # onnx_model = onnx_load_model(onnx_model_filename)
-    # onnx_estimate_fab(onnx_model, eeg_epoch)
-    # use this as centile information?
