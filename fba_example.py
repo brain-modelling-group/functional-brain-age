@@ -449,11 +449,13 @@ def estimate_centile(age_var, fba_var, sub_id, centile_bin_centres=np.r_[0.5:100
         import matplotlib.pyplot as plt
         fig_handle, ax = plt.subplots()
 
-        # Do some plotting
+        # Plot all points in age and fba
         ax.plot(age_var, fba_var, color=[0.55, 0.55, 0.55], marker='o', linestyle='none', markersize=4)
-        # Plot single subject
+        # Plot centiles as thin lines
         ax.plot(age_centiles, fba_centiles.T, color=[0.0, 0.0, 0.0, 0.05])
+        # Plot centile of sub_id
         ax.plot(age_centiles, fba_centiles[fba_idx, :].T, color='blue', linewidth=2)
+        # Plot sub_id single subject
         ax.plot(age, fba, color='green', marker='o', linestyle='none', markersize=12)
         ax.set_xlim([0, 18])
         ax.set_ylim([0, 20])
@@ -491,12 +493,12 @@ def onnx_load_model(filename=None):
     return session
 
 
-def onnx_estimate_fab(onnx_session, eeg_epochs):
+def onnx_estimate_fba(onnx_session, eeg_epochs):
     # this is pulling the above data from a mat file into the correct format for ONNX/runtime
     input_name = onnx_session.get_inputs()[0].name  # find what input layer is called
     result = onnx_session.run(None, {input_name: eeg_epochs})  # run network - compare this to the outputs variable
                                                                # aboveto compare ONNX runtime to Matlab
     outputs = result[0]
-    fab_estimate = np.mean(outputs)
-    return fab_estimate
+    fba_estimate = np.mean(outputs)
+    return fba_estimate
 
