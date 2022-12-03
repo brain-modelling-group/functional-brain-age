@@ -15,6 +15,9 @@ import scipy.io as io
 import scipy.signal as signal
 import onnxruntime as rt  # onnx runtime is the bit that deals with the ONNX network
 
+# Import only these functions
+__all__ = ['load_edf', 'make_montage', 'make_data_epochs', 'estimate_centile', 'onnx_load_model', 'onnx_estimate_fba']
+
 
 # --------------------------------- EDF related functions -------------------------------------------------------------#
 def load_edf(filename, **kwargs):
@@ -46,6 +49,7 @@ def load_edf(filename, **kwargs):
         filename = str(filename)
 
     ext = os.path.splitext(filename)[1][1:].lower()
+    import pdb; pdb.set_trace()
     if ext in 'edf':
         try:
             with open(filename, 'rb') as fid:
@@ -315,9 +319,8 @@ def make_data_epochs(data, n_samples=29, c=1, epoch_length=1920, num_channels=18
 
     return arr
 
+
 # --------------------------------- eeg data  related functions -------------------------------------------------------#
-
-
 def _load_fitted_centiles(filename=None):
     """
     Load precomputed age and fba centiles, computed via GAMLSS in Rstudio
@@ -483,6 +486,8 @@ def onnx_load_model(filename=None):
     --------
     session :  an ONNX InferenceSession object, main class of ONNX Runtime. It is used to load and run an ONNX model,
                as well as specify environment and application configuration options.
+
+    # TODO: automate loading D1, D2 or D1D2, with 2 channels or 18 channels
     """
     if filename is not None:
         onnx_model_file = filename
