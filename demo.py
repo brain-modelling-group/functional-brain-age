@@ -27,7 +27,7 @@ parser.add_argument('--onnx_filename',
                     help=''' The name of the .onnx file with the pretrained network.''')
 
 parser.add_argument('--montage_filename',
-                    default='fba/data/montages/default_fba_montage.txt',
+                    default='fba/data/montages/default_fba_18ch_montage.txt',
                     type=str,
                     help=''' The name of the .txt with the desired EEG montage''')
 
@@ -41,7 +41,7 @@ if __name__ == '__main__':
     eeg_epoch = fba.make_data_epochs(eeg_data)
 
     # Load pretrained nn model
-    onnx_model = fba.onnx_load_model()                      # Loads default model D1_NN_18ch_model.onnx
+    onnx_model = fba.onnx_load_model() # Loads default model D1_NN_18ch_model.onnx
 
     # Estimate FBA
     fba_var = fba.onnx_estimate_fba(onnx_model, eeg_epoch)

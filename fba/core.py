@@ -210,8 +210,7 @@ def _load_montage(filename=None):
     """
 
     if filename is None:
-        import os
-        filename = os.path.realpath(os.path.join(os.path.dirname(__file__), 'data', 'montages', 'demo_montage.txt'))
+        filename = os.path.realpath(os.path.join(os.path.dirname(__file__), 'data', 'montages', 'default_fba_18ch_montage.txt'))
 
     montage_specs = dict()
     with open(filename, 'r+') as montage:
@@ -249,14 +248,14 @@ def make_montage(edf_eeg, montage_specs=None, preprocess=True):
         montage_specs: dict = _load_montage(filename)
     ch_x = list(montage_specs[0].keys())[0]
     num_samples = edf_eeg['raw_data'][ch_x].shape[0]
-    eeg_data = np.zeros_like((num_samples,len(montage_specs.keys())))
+    eeg_data = np.empty((num_samples,len(montage_specs.keys())))
 
     for idx in montage_specs.keys():
         ch_a = list(montage_specs[idx].keys())[0]
         ch_b = montage_specs[idx][ch_a]
 
         eeg_data[..., idx] = edf_eeg['raw_data'][ch_a] - edf_eeg['raw_data'][ch_b]
-        
+
     eeg_data = eeg_data * edf_eeg['scale'][0]
     eeg_data = eeg_data[0:15 * 250 * 60, 0:]
 
@@ -353,7 +352,8 @@ def _load_fitted_centiles(filename=None):
 
     """
     if filename is None:
-        filename = 'demo-data/centiles/fba_fitted_centiles_D1D2.mat'
+        filename = os.path.realpath(os.path.join(os.path.dirname(__file__), 'data', 'centiles', 'fba_fitted_centiles_D1D2.mat'))
+
     precomp_centiles = io.loadmat(filename)
     offset_pars = dict()
     offset_pars['offset'] = True
@@ -413,7 +413,11 @@ def estimate_centile(age_var, fba_var, sub_id, centile_bin_centres=np.r_[0.5:100
         age_centiles, fba_centiles, _ = _load_fitted_centiles(**kwargs)
 
     num_centiles = centile_bin_centres.shape[0]
-    num_subjects = age_var.shape[0]
+    try:
+        num_subjects = age_var.shape[0]
+    except:
+        num_subjects = 1
+
     if offset_pars['offset']:
         # Apply offset
         fba_var = fba_var + (age_var - (offset_pars['value'] * age_var))
@@ -436,7 +440,10 @@ def estimate_centile(age_var, fba_var, sub_id, centile_bin_centres=np.r_[0.5:100
     test_fba_centile = fba_centiles[:, age_nearest_idx].T
 
     # Check dimensions are ok
-    assert test_fba_centile.shape == (num_subjects, num_centiles)
+    if num_subjects > 1:
+        assert test_fba_centile.shape == (num_subjects, num_centiles)
+    else:
+        assert test_fba_centile.shape[0] == num_centiles
 
     if not isinstance(age_var, np.ndarray):
         # [~, fba_nearest_idx] = min(bsxfun( @ (x, y) abs(x - y), fba_var(subid), testcen'),[],2);
@@ -498,7 +505,8 @@ def onnx_load_model(filename=None):
     if filename is not None:
         onnx_model_file = filename
     else:
-        onnx_model_file = 'demo-onnx/D1_NN_18ch_model.onnx'  # ANET style network - seznet_v2.onnx is RESNET
+        onnx_model_file = os.path.realpath(os.path.join(os.path.dirname(__file__), 'data', 'onnx', 'D1_NN_18ch_model.onnx'))
+        # ANET style network - seznet_v2.onnx is RESNET
 
     session = rt.InferenceSession(onnx_model_file)           # load network
     return session
