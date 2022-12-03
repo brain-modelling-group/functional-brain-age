@@ -35,16 +35,16 @@ parser.add_argument('--raw_age',
 if __name__ == '__main__':
     args = parser.parse_args()
 
-    # Load, preprocess and chunk EEG data
+    # Load, preprocess and chunk EEG data into a shape that the NN uses
     eeg_edf = fba.load_edf(args.edf_filename)
     eeg_data = fba.make_montage(eeg_edf, preprocess=True)   # Uses default montage
-    eeg_epoch = fba.make_data_epochs(eeg_data)
+    eeg_epochs = fba.make_data_epochs(eeg_data)
 
     # Load pretrained nn model
     onnx_model = fba.onnx_load_model() # Loads default model D1_NN_18ch_model.onnx
 
     # Estimate FBA
-    fba_var = fba.onnx_estimate_fba(onnx_model, eeg_epoch)
+    fba_var = fba.onnx_estimate_fba(onnx_model, eeg_epochs)
 
     # Estimate centile
     sub_id = 0
