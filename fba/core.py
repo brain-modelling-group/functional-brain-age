@@ -49,7 +49,6 @@ def load_edf(filename, **kwargs):
         filename = str(filename)
 
     ext = os.path.splitext(filename)[1][1:].lower()
-    import pdb; pdb.set_trace()
     if ext in 'edf':
         try:
             with open(filename, 'rb') as fid:
@@ -207,18 +206,20 @@ def _load_montage(filename=None):
             such that the resulting eeg data will be returned will be channel_a - channel_b
 
     #TODO: generalise to accommodate unipolar montages
+    # TODO: generalise root directory path and data directory
     """
 
     if filename is None:
-        filename = 'demo-data/montages/demo_montage.txt'
+        import os
+        filename = os.path.realpath(os.path.join(os.path.dirname(__file__), 'data', 'montages', 'demo_montage.txt'))
 
     montage_specs = dict()
     with open(filename, 'r+') as montage:
-        channels = montage.read().split('\n')
-        for channel in channels:
-            ch_a = channel.split('-')[0]
-            ch_b = channel.split('-')[1]
-            montage_specs[ch_a] = ch_b
+        derivations = montage.read().split('\n')
+        for idx, derivation in enumerate(derivations):
+            ch_a = derivation.split('-')[0]
+            ch_b = derivation.split('-')[1]
+            montage_specs[idx] = {ch_a:ch_b}
     return montage_specs
 
 
@@ -246,11 +247,16 @@ def make_montage(edf_eeg, montage_specs=None, preprocess=True):
     elif isinstance(montage_specs, (str, Path)):
         filename = montage_specs
         montage_specs: dict = _load_montage(filename)
+    ch_x = list(montage_specs[0].keys())[0]
+    num_samples = edf_eeg['raw_data'][ch_x].shape[0]
+    eeg_data = np.zeros_like((num_samples,len(montage_specs.keys())))
 
-    eeg_data = np.zeros_like(edf_eeg['raw_data'])
+    for idx in montage_specs.keys():
+        ch_a = list(montage_specs[idx].keys())[0]
+        ch_b = montage_specs[idx][ch_a]
 
-    for (ch_a, ch_b), idx in enumerate(zip(montage_specs.keys(), montage_specs.values())):
         eeg_data[..., idx] = edf_eeg['raw_data'][ch_a] - edf_eeg['raw_data'][ch_b]
+        
     eeg_data = eeg_data * edf_eeg['scale'][0]
     eeg_data = eeg_data[0:15 * 250 * 60, 0:]
 
