@@ -354,39 +354,6 @@ def _load_fitted_centiles(filename=None):
     return precomp_centiles['age_centiles'].flatten(), precomp_centiles['fba_centiles'], offset_pars
 
 
-def _find_nearest_diff_index_simple(targets, sources):
-    """
-    Simple version: slow and memory heavy for large targets and sources
-
-    :param targets: 
-    :param sources: 
-    :return: 
-    """
-    differences = (sources.reshape(1, -1) - targets.reshape(-1, 1))
-    indices = np.abs(differences).argmin(axis=0)
-    return indices
-
-
-def _find_nearest_diff_index_fast(targets, sources):
-    """
-    Optimised version: ~100x faster than (_find_nearest_diff_index_simple) for
-    large sources and targets, much less memory
-    """
-
-    # Make sure our target vector is sorted
-    is_sorted = lambda a: np.all(a[:-1] <= a[1:])
-    if not is_sorted(targets):
-        target_sort_indices = np.argsort(targets)
-        targets = targets[target_sort_indices]
-    else:
-        target_sort_indices = np.arange(0, np.size(targets))
-
-    # Convert to n-1 centres vector, as searchsorted() finds insertion points
-    target_middles = targets[1:] - (np.diff(targets.astype('f')) / 2)
-
-    return target_sort_indices[np.searchsorted(target_middles, sources)]
-
-
 def estimate_centile(age_var, fba_var, sub_id, centile_bin_centres=np.r_[0.5:100:0.5], offset_pars=None, to_plot=False, **kwargs):
     """
      From original in matlab: fba_centile_estimate.m
@@ -460,7 +427,6 @@ def estimate_centile(age_var, fba_var, sub_id, centile_bin_centres=np.r_[0.5:100
         fba_nearest_idx = np.argmin(np.abs(fba_var - test_fba_centile))
         fba = fba_var
     else:
-        fba_nearest_idx = _find_nearest_diff_index_fast(fba_var, test_fba_centile)
         fba_nearest_idx = np.argmin(np.abs(np.tile(fba_var, (1, test_fba_centile.shape[0])) - test_fba_centile), axis=1)
         fba = fba_var[sub_id]
 
