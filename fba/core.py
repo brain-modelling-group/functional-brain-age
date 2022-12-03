@@ -513,6 +513,16 @@ def onnx_load_model(filename=None):
 
 
 def onnx_estimate_fba(onnx_session, eeg_epochs):
+    """
+    Estimates Functional Brain Age (FBA) of the data in eeg_epochs using the preloaded NN model
+
+    Parameters
+    ----------
+    onnx_session : object
+        an ONNX InferenceSession object
+    eeg_epochs : array
+          4D array of shape (n_samples, c, epoch_length, num_channels)
+    """
     # this is pulling the above data from a mat file into the correct format for ONNX/runtime
     input_name = onnx_session.get_inputs()[0].name  # find what input layer is called
     result = onnx_session.run(None, {input_name: eeg_epochs})  # run network - compare this to the outputs variable
