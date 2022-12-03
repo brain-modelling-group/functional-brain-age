@@ -50,5 +50,5 @@ if __name__ == '__main__':
     sub_id = 0
     centile, _, _, _ = fba.estimate_centile(args.raw_age, fba_var, sub_id, to_plot=True) # Uses default bins, lookup table and offset
 
-    msg = f"Predicted Functional Brain Age (FBA) is {fba_var} years"
+    msg = f"Predicted Functional Brain Age (FBA) is {fba_var} years.\nEstimated centile is {centile}%"
     print(msg)
