@@ -37,11 +37,11 @@ if __name__ == '__main__':
 
     # Load, preprocess and chunk EEG data into a shape that the NN uses
     eeg_edf = fba.load_edf(args.edf_filename)
-    eeg_data = fba.make_montage(eeg_edf, preprocess=True)   # Uses default montage
+    eeg_data = fba.make_montage(eeg_edf, preprocess=True)   # Uses default 18 ch montage
     eeg_epochs = fba.make_data_epochs(eeg_data)
 
     # Load pretrained nn model
-    onnx_model = fba.onnx_load_model() # Loads default model D1_NN_18ch_model.onnx
+    onnx_model = fba.onnx_load_model(filename=args.onnx_filename) # Loads default model D1_NN_18ch_model.onnx
 
 #------------------------------------------OUTPUTS---------------------------------------------------------------------#
 
