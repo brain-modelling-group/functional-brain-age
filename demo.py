@@ -43,12 +43,20 @@ if __name__ == '__main__':
     # Load pretrained nn model
     onnx_model = fba.onnx_load_model() # Loads default model D1_NN_18ch_model.onnx
 
-    # Estimate FBA
-    fba_var = fba.onnx_estimate_fba(onnx_model, eeg_epochs)
+#------------------------------------------OUTPUTS---------------------------------------------------------------------#
+
+    # Estimated FBA
+    fba_var_nn = fba.onnx_estimate_fba(onnx_model, eeg_epochs)
 
     # Estimate centile
     sub_id = 0
-    centile, _, _, _ = fba.estimate_centile(args.raw_age, fba_var, sub_id, to_plot=True) # Uses default bins, lookup table and offset
+    # Estimate Centile from Growth Chart and potentially correct/offset FBA to align with growth chart.
+    centile, fba_var_corrected, _ = fba.estimate_centile(args.raw_age, fba_var_nn, sub_id, to_plot=True) # Uses default bins, lookup table and offset
 
-    msg = f"\nPredicted Functional Brain Age (FBA) is {fba_var} years.\nEstimated centile is {centile}%"
+    msg = f"""
+          Empirical/Raw Brain Age is {args.raw_age} years.\n  
+          Predicted Functional Brain Age (FBA) is {fba_var_nn} years.\n 
+          Estimated centile from Growth Chart is {centile}%.\n
+          Corrected Functional Brain Age (FBA) is {fba_var_corrected} years.\n
+          Predicted Age Difference (PAD) is: {args.raw_age - fba_var_corrected}"""
     print(msg)
