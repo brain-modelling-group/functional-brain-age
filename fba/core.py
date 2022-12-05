@@ -248,10 +248,10 @@ def make_montage(edf_eeg, montage_specs=None, num_channels=18, preprocess=True):
     # Check is montage is specified in a text file
 
     if montage_specs is None:
-       montage_specs = _load_montage()
+       montage_specs = _load_montage(num_channels=num_channels)
     elif isinstance(montage_specs, (str, Path)):
         filename = montage_specs
-        montage_specs: dict = _load_montage(filename)
+        montage_specs: dict = _load_montage(filename, num_channels=num_channels)
     ch_x = list(montage_specs[0].keys())[0]
     num_samples = edf_eeg['raw_data'][ch_x].shape[0]
     eeg_data = np.empty((num_samples,len(montage_specs.keys())))

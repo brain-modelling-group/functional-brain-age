@@ -26,6 +26,11 @@ parser.add_argument('--montage_filename',
                     type=str,
                     help=''' The name of the .txt with the desired EEG montage''')
 
+parser.add_argument('--num_channels',
+                    default=2,
+                    type=int,
+                    help='''Number of EEG channels to pass to the NN model.''')
+
 parser.add_argument('--raw_age',
                     default=0.4,
                     type=float,
@@ -37,8 +42,8 @@ if __name__ == '__main__':
 
     # Load, preprocess and chunk EEG data into a shape that the NN uses
     eeg_edf = fba.load_edf(args.edf_filename)
-    eeg_data = fba.make_montage(eeg_edf, preprocess=True)   # Uses default 18 ch montage
-    eeg_epochs = fba.make_data_epochs(eeg_data)
+    eeg_data = fba.make_montage(eeg_edf, num_channels=args.num_channels, preprocess=True)   # Uses default 18ch montage
+    eeg_epochs = fba.make_data_epochs(eeg_data, num_channels=args.num_channels)
 
     # Load pretrained nn model
     onnx_model = fba.onnx_load_model(filename=args.onnx_filename) # Loads default model D1_NN_18ch_model.onnx

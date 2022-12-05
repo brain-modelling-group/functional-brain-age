@@ -155,9 +155,9 @@ You should see the following outputs:
           Predicted Age Difference (PAD) is: [-0.12218587]
    ```
 
-If you want to use a different NN you can do:
+If you want to use a different NN with 2 channels you can do:
 ```
-python demo.py --onnx_filename fba/data/onnx/D1D2_2ch_model_Opset12.onnx 
+python demo.py --num_channels 2 --onnx_filename fba/data/onnx/D1D2_2ch_model_Opset12.onnx 
 ```
 
 
