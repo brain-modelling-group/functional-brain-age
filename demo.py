@@ -27,7 +27,7 @@ parser.add_argument('--montage_filename',
                     help=''' The name of the .txt with the desired EEG montage''')
 
 parser.add_argument('--num_channels',
-                    default=2,
+                    default=18,
                     type=int,
                     help='''Number of EEG channels to pass to the NN model.''')
 
