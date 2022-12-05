@@ -119,8 +119,8 @@ This script is an example of how you may use our trained network. To get a local
 
 0. Clone the repo and navigate to the folder
    ```sh
-   git clone https://github.com/your_username_/Project-Name.git
-   cd fba-example/
+   git clone git@github.com:pausz/functional-brain-age.git
+   cd functional-brain-age/
    ```
 3. Create python environment, and activate 
    ```sh
@@ -167,6 +167,7 @@ If you want to use a different NN you can do:
 ## to-do
 
 - [ ] Add more demo data files
+- [ ] Update github account in Installation steps, after repo has been transferred
 
 
 See the [open issues](https://github.com/pausz/fab-example/issues) for a full list of proposed features (and known issues).
