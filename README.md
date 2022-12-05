@@ -58,7 +58,7 @@
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#to-do">To-Do</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
@@ -73,24 +73,24 @@
 ## About The Project
 
 - [ ] Add a pic of the main result here
-- [ ] Add a paragraph with the description of what this thing is and what it does
 
-The code in this repository estimates the 'age' of a segment of EEG recording from a paediatric population. This EEG based estimate of age is referred to as the function brain age (FBA). This code relates to the following publication with a Python and Matlab version available.
+The code in this repository estimates the 'age' of a segment of EEG recording from a paediatric population. 
+This EEG based estimate of age is referred to as the function brain age (FBA). 
+This code relates to the following publication with a Python and Matlab version available.
 
 **Inputs:**
-
-- (1) EEG file in EDF format (a segment of N2 sleep)
-- (2) The age of the subject of EEG recording (expressed in years)
+- (1) EEG file in EDF format (a segment of N2 sleep).
+- (2) The age of the subject of EEG recording (expressed in years).
 - (3) The prediction algorithm used: 
     - training dataset: D1, D2 or D1&D2, 
     - number of channels: 2 or 18, 
     - algorithm type: neural netowrks or Gaussian process regression [Matlab version only]
 
 **Outputs:** 
-- (1) Functional Brain Age (expressed in years)
-- (2) Centile from Growth Chart based on our data
-- (3) FBA corrected to align with growth chart
-- (4) Predicted age difference (PAD)
+- (1) Functional Brain Age (expressed in years).
+- (2) Centile from Growth Chart based on our data.
+- (3) FBA corrected to align with growth chart.
+- (4) Predicted age difference (PAD).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -112,14 +112,10 @@ This script is an example of how you may use our trained network. To get a local
 
 ### Prerequisites
 - We have tested this script on:
-- [ ] Linux 
-- [ ] Windows
-- Using python 3.8 and 3.9
+  Linux (Ubuntu 22.04 LTS), using python 3.9
 
 
 ### Installation
-
-_Below is an example of how you can instruct your audience on installing and setting up your app. This template doesn't rely on any external dependencies or services._
 
 0. Clone the repo and navigate to the folder
    ```sh
@@ -142,27 +138,40 @@ _Below is an example of how you can instruct your audience on installing and set
 
 <!-- USAGE EXAMPLES -->
 ## Usage
+To see how this works with the default dataset, montage and trained NN, you can simply do:
+   ```sh
+   python demo.py 
+   ```
+You should see the following outputs:
+   ```sh
+          Empirical/Raw Brain Age is 0.4 years.
+  
+          Predicted Functional Brain Age (FBA) is 0.472392201423645 years.
+ 
+          Estimated centile from Growth Chart is 37.5%.
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. 
-You may also link to more resources.
+          Corrected Functional Brain Age (FBA) is [0.52218587] years.
+
+          Predicted Age Difference (PAD) is: [-0.12218587]
+   ```
+
+If you want to use a different NN you can do:
+
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 
-<!-- ROADMAP -->
-## Roadmap
+<!-- TO-DO -->
+## to-do
 
-- [x] Add how to run from command line
-- [x] Add back to top links
 - [ ] Add more demo data files
-- [ ] Add "components" document to easily copy & paste sections of the readme
 
 
 See the [open issues](https://github.com/pausz/fab-example/issues) for a full list of proposed features (and known issues).
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#to-do">back to top</a>)</p>
 
 
 <!-- LICENSE -->
