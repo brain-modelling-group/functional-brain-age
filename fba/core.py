@@ -188,7 +188,7 @@ def to_dataframe(filename=None, save=False):
 
 
 # --------------------------------- eeg data  related functions -------------------------------------------------------#
-def _load_montage(filename=None):
+def _load_montage(filename=None, num_channels=18):
     """
 
     Parameters
@@ -210,7 +210,12 @@ def _load_montage(filename=None):
     """
 
     if filename is None:
-        filename = os.path.realpath(os.path.join(os.path.dirname(__file__), 'data', 'montages', 'default_fba_18ch_montage.txt'))
+        if num_channels == 18:
+            default_montage = 'default_fba_18ch_montage.txt'
+        elif num_channels == 2:
+            default_montage = 'default_fba_2ch_montage.txt'
+
+        filename = os.path.realpath(os.path.join(os.path.dirname(__file__), 'data', 'montages', default_montage))
 
     montage_specs = dict()
     with open(filename, 'r+') as montage:
