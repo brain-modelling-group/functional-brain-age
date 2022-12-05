@@ -222,7 +222,7 @@ def _load_montage(filename=None):
     return montage_specs
 
 
-def make_montage(edf_eeg, montage_specs=None, preprocess=True):
+def make_montage(edf_eeg, montage_specs=None, num_channels=18, preprocess=True):
     """
     Either read a montage from a file, or a dictionary with the montage
     Parameters
@@ -230,7 +230,8 @@ def make_montage(edf_eeg, montage_specs=None, preprocess=True):
     edf_eeg : dict
         dictionary with all the edf info and data
     montage_specs  : str or Path or dict
-
+    num_channels  : int
+        number of channels to extract from edf_eeg. Default is 18 channels, specified in the default montage file.
     preprocess     : bool
          whether to apply preprocessing or not, if True (default) then the data is filtered and downsampled to 32Hz.
 
