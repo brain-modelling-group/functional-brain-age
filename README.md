@@ -156,7 +156,9 @@ You should see the following outputs:
    ```
 
 If you want to use a different NN you can do:
-
+```
+python demo.py --onnx_filename fba/data/onnx/D1D2_2ch_model_Opset12.onnx 
+```
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
