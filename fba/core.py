@@ -479,9 +479,9 @@ def estimate_centile(age_var, fba_var, sub_id, centile_bin_centres=np.r_[0.5:100
         ax.set_ylabel('FBA [years]')
         plt.show()
 
-        return centile, age_nearest_idx, fba_nearest_idx, fig_handle
+        return centile, fba_var, fig_handle
 
-    return centile, age_nearest_idx, fba_nearest_idx
+    return centile, fba_var
 
 
 # -- ONNX related functions
