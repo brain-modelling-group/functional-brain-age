@@ -190,7 +190,7 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 <!-- CONTACT -->
 ## Contact
 - Nathan Stevenson - *nathan* dot *stevenson* _at_ *qimrberghofer* dot *edu* dot *au* 
-
+- Kartik Iyer - *kartik* dot *iyer* _at_ *qimrberghofer* dot *edu* dot *au* 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
