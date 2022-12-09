@@ -1,0 +1,11 @@
+% For the following variables in the workspace once loaded relate to:
+% 'D1_18ch_EEG_Features_Age.mat' = training dataset, features derived on average of 18 channel 
+% 'D1_2ch_EEG_Features_Age.mat' = training dataset, features derived on average of 2 channel 
+% 'D2_2ch_EEG_Features_Age.mat' = external dataset, features derived on average of 2 channel
+%
+% age_bins = the ages in which the cell 'ages_binned' correspond to 
+%
+% all subject ages can be accessed via:
+% 	subject_age = horzcat(ages_binned{:});
+
+% EEG features represent z-scored values for each features on 'feature_list'
