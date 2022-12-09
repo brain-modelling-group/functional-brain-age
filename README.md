@@ -164,16 +164,6 @@ python demo.py --num_channels 2 --onnx_filename fba/data/onnx/D1D2_2ch_model_Ops
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
-
-<!-- TO-DO -->
-## to-do
-
-See the [open issues](https://github.com/pausz/fab-example/issues) for a full list of proposed features (and known issues).
-
-<p align="right">(<a href="#to-do">back to top</a>)</p>
-
-
 <!-- LICENSE -->
 ## License
 
