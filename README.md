@@ -191,7 +191,7 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
-- [ ] Add something here if appropriate (ie, grant number, etc)
+The study was supported by an NHMRC Grant no. 2002135, the HUS Children’s Hospital/HUS diagnostic center research funds, Finnish Academy (335788, 332017), Finnish Pediatric Foundation (Lastentautiensäätiö), Sigrid Juselius Foundation
   
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
