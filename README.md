@@ -162,13 +162,17 @@ python demo.py --num_channels 2 --onnx_filename fba/data/onnx/D1D2_2ch_model_Ops
 ```
 
 
-For usage in MATLAB, montage and trained NN, you can simply do:
+For usage in MATLAB (tested on 2022a), montage and trained NN, you can simply do the following, where 'path' is the full folder directory where the data is stored and 'filename' is the full name of the .edf file (e.g. 'subject1.edf') 
    ```sh
    [data,predictFBA,cFBA,centile,pad] = FBA(path,filename,0.4,'bipolar',[],'NN','D1_NN_18ch_model');
    ```
 In the MATLAB command window, you should see a similar read out to the Python implementation.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+Test runs of NN models executed within 10 seconds on either Python or MATLAB implementations on a Windows PC running an Intel(R) Xeon(R) W-1290P CPU @ 3.70GHz and 64 GB of RAM. 64-bit Operating system. 
+
 
 <!-- LICENSE -->
 ## License
