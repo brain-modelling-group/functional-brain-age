@@ -139,13 +139,13 @@ This script is an example of how you may use our trained network. To get a local
 
 <!-- USAGE EXAMPLES -->
 ## Usage
-To see how this works with the default dataset, montage and trained NN, you can simply do:
+To see how this works with the default dataset in Python, montage and trained NN, you can simply do:
    ```sh
    python demo.py 
    ```
 You should see the following outputs:
    ```sh
-          Empirical/Raw Brain Age is 0.4 years.
+          Empirical Age is 0.4 years.
   
           Predicted Functional Brain Age (FBA) is 0.472392201423645 years.
  
@@ -161,6 +161,12 @@ If you want to use a different NN with 2 channels you can do:
 python demo.py --num_channels 2 --onnx_filename fba/data/onnx/D1D2_2ch_model_Opset12.onnx 
 ```
 
+
+For usage in MATLAB, montage and trained NN, you can simply do:
+   ```sh
+   [data,predictFBA,cFBA,centile,pad] = FBA(path,filename,0.4,'bipolar',[],'NN','D1_NN_18ch_model');
+   ```
+In the MATLAB command window, you should see a similar read out to the Python implementation.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
