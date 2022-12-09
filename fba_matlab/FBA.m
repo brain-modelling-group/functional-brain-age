@@ -78,6 +78,7 @@ if strcmp(mdl_type,'GPR')
     end
     
     %PREDICT WITH CV GPR MODEL
+    load(mdl, 'gpr.mdl')
     pFBA=predict(mdl,mfeat);
     
     else strcmp(mdl_type,'NN')
