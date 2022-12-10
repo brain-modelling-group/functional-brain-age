@@ -120,7 +120,7 @@ This script is an example of how you may use our trained network. To get a local
 
 0. Clone the repo and navigate to the folder
    ```sh
-   git clone git@github.com:brain-modelling-group/functional-brain-age.git
+   git clone https://github.com/brain-modelling-group/functional-brain-age
    cd functional-brain-age/
    ```
 3. Create python environment, and activate 
