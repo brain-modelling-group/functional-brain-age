@@ -145,15 +145,15 @@ To see how this works with the default dataset in Python, montage and trained NN
    ```
 You should see the following outputs:
    ```sh
-          Empirical Age is 0.4 years.
+          Empirical Age is 5 years.
   
-          Predicted Functional Brain Age (FBA) is 0.472392201423645 years.
+          Predicted Functional Brain Age (FBA) is 4.987 years.
  
-          Estimated centile from Growth Chart is 37.5%.
+          Estimated centile from Growth Chart is 38.5%.
 
-          Corrected Functional Brain Age (FBA) is [0.52218587] years.
+          Corrected Functional Brain Age (FBA) is [5.6094] years.
 
-          Predicted Age Difference (PAD) is: [-0.12218587]
+          Predicted Age Difference (PAD) is: [0.60938]
    ```
 
 If you want to use a different NN with 2 channels you can do:
@@ -164,7 +164,7 @@ python demo.py --num_channels 2 --onnx_filename fba/data/onnx/D1D2_2ch_model_Ops
 
 For usage in MATLAB (tested on 2022a), montage and trained NN, you can simply do the following, where 'path' is the full folder directory where the data is stored and 'filename' is the full name of the .edf file (e.g. 'subject1.edf') 
    ```sh
-   [data,predictFBA,cFBA,centile,pad] = FBA(path,filename,0.4,'bipolar',[],'NN','D1_NN_18ch_model');
+   [data,predictFBA,cFBA,centile,pad] = FBA(path,filename,5,'bipolar',[],'NN','D1_NN_18ch_model');
    ```
 In the MATLAB command window, you should see a similar read out to the Python implementation.
 
