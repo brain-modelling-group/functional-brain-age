@@ -12,7 +12,7 @@ import fba
 parser = argparse.ArgumentParser()
 
 parser.add_argument('--edf_filename',
-                    default='fba/data/edf/FLE14-609.edf',
+                    default='fba/data/edf/random_noise.edf',
                     type=str,
                     help=''' The name of the .edf file with EEG data''')
 
