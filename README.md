@@ -72,7 +72,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-![alt text](https://github.com/brain-modelling-group/functional-brain-age/blob/main/fba/fba_figure.tif?raw=true)
+![ezcx logo](https://github.com/brain-modelling-group/functional-brain-age/blob/main/fba/fba_figure.tif?raw=true)
 
 The code in this repository estimates the 'age' of a segment of EEG recording from a paediatric population. 
 This EEG based estimate of age is referred to as the function brain age (FBA). 
