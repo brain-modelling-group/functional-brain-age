@@ -72,8 +72,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-![fba_figure_1](https://user-images.githubusercontent.com/39141919/206331448-2b9f4cc0-c3c8-4caf-a253-7205a9d2c89d.jpg)
-
+![alt text](https://github.com/brain-modelling-group/functional-brain-age/blob/main/fba/fba_figure.tif?raw=true)
 
 The code in this repository estimates the 'age' of a segment of EEG recording from a paediatric population. 
 This EEG based estimate of age is referred to as the function brain age (FBA). 
@@ -195,7 +194,8 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 ## Citation
 - If you use this code, please cite: <insert reference> 
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+Iyer, K. K., J. A. Roberts, M. Waak, S. J. Vogrin, A. Kevat, J. Chawla, L. M. Haataja, L. Lauronen, S. Vanhatalo and N. J. Stevenson (2023). "A growth chart of brain function from infancy to adolescence based on electroencephalography." bioRxiv: 2023
+[<p align="right">(<a href="#readme-top">back to top</a>)</p>](https://www.biorxiv.org/content/10.1101/2023.07.07.548062v1)
 
 
 <!-- ACKNOWLEDGMENTS -->
