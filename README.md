@@ -72,7 +72,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-![fba_figure1][(https://github.com/brain-modelling-group/functional-brain-age/assets/39141919/03f5cad9-da6e-4beb-b02e-e797a258ff08)]
+![fba_figure1](https://github.com/brain-modelling-group/functional-brain-age/assets/39141919/25b49c8e-63ac-483a-9ed3-22fe3c2f5d47)
 
 
 The code in this repository estimates the 'age' of a segment of EEG recording from a paediatric population. 
