@@ -32,7 +32,7 @@ parser.add_argument('--num_channels',
                     help='''Number of EEG channels to pass to the NN model.''')
 
 parser.add_argument('--raw_age',
-                    default=2,
+                    default=8,
                     type=float,
                     help='''Raw (Functional Brain Age) or just Age of the data in the EDF file, expressed in years.''')
 
