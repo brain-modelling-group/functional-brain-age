@@ -196,7 +196,7 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 - If you use this code, please cite: <insert reference> 
 
 Iyer, K.K., Roberts, J.A., Waak, M., Vogrin, S.J., Kevat, A., Chawla, J., Haataja, L.M., Lauronen, L., Vanhatalo, S. and Stevenson, N.J., 2024. A growth chart of brain function from infancy to adolescence based on EEG. EBioMedicine, 102.
-[<p align="right">(<a href="#readme-top">back to top</a>)</p>]([https://www.biorxiv.org/content/10.1101/2023.07.07.548062v1](https://www.thelancet.com/journals/ebiom/article/PIIS2352-3964(24)00096-3/fulltext)
+(https://www.thelancet.com/journals/ebiom/article/PIIS2352-3964(24)00096-3/fulltext)
 
 
 <!-- ACKNOWLEDGMENTS -->
