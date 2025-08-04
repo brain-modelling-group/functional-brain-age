@@ -1,3 +1,5 @@
+% To run below, download from Zenodo link: https://zenodo.org/records/16734702
+
 % Neural Network readouts to process
 model_files = {'results_resnn_hypnogram_ovn_net_v1.mat','results_resnnseq_hypnogram_ovn_net_v1.mat'};
 

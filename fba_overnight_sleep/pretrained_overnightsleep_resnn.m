@@ -5,6 +5,8 @@
 % -------------------------------------------
 
 % Load EEG sample and pretrained model
+% Grab example file from Zenodo link: https://zenodo.org/records/16734702
+
 load examplefile_eeg_hyp.mat          % Contains 'eeg_ch' [1920 x hyp x epochs], 'hypnogram'; where W = 1, N1 = 2, N2 = 3, N3 = 4, REM = 5; 
 load age_sleep_norm_64hz.mat          % Contains pretrained Res-NN model 'net_sleep'; 64 hz version; for EEG resampled to 32 Hz use 32 hz version
 
